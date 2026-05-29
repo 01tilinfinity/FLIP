@@ -1,0 +1,19 @@
+name: flip
+channels:
+  - conda-forge
+dependencies:
+  - python=3.11
+  - pip
+  - pandas>=2.2
+  - numpy
+  - scikit-learn
+  - ipykernel
+  - pip:
+      - datasets>=2.20.0
+      - huggingface-hub>=0.25.0
+      - openai>=1.0.0
+      - python-dotenv>=1.0.1
+      - rank-bm25>=0.2.2
+      - sentence-transformers>=3.0.0
+      - torch
+      - tqdm>=4.66.0

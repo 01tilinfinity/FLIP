@@ -1,0 +1,12 @@
+.venv/
+__pycache__/
+.DS_Store
+.env
+.env.*
+!.env.example
+*.key
+*.pem
+*.token
+.cache/
+hf_cache/
+outputs/
