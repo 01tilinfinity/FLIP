@@ -68,6 +68,15 @@ python scripts/sweep_score_anti_rrf.py \
   --output-dir results/score_anti_rrf
 ```
 
+Softer variants add hinge penalties and confidence gates:
+
+```bash
+python scripts/sweep_improved_anti_rrf.py \
+  --decompositions-jsonl outputs/openai_full_v3/query_decompositions.jsonl \
+  --candidate-top-ns 5,10,20,all \
+  --output-dir results/improved_anti_rrf
+```
+
 Outputs:
 
 - `outputs/query_decompositions.jsonl`
