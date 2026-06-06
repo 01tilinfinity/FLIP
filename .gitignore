@@ -10,3 +10,4 @@ __pycache__/
 .cache/
 hf_cache/
 outputs/
+results/**/score_anti_rrf_details.csv

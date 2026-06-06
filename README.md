@@ -56,6 +56,18 @@ python scripts/run_kflip_experiment.py \
   --output-dir outputs/openai_full_v3_top10
 ```
 
+Score-level Anti-RRF sweeps normalize baseline/target/trap scores per query and
+rerank with `alpha * baseline + target - beta * trap`:
+
+```bash
+python scripts/sweep_score_anti_rrf.py \
+  --decompositions-jsonl outputs/openai_full_v3/query_decompositions.jsonl \
+  --candidate-top-ns 5,10,20,all \
+  --alphas 0,0.25,0.5,0.75,1,1.5,2 \
+  --betas 0.1,0.2,0.3,0.5,0.75,1 \
+  --output-dir results/score_anti_rrf
+```
+
 Outputs:
 
 - `outputs/query_decompositions.jsonl`
