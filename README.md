@@ -32,6 +32,20 @@ For the planned K-FLIP setup, use `q1` so `doc1` is the answer document and
 `doc1` and `doc2` columns and flips the explicit `answer_doc` / `trap_doc`
 labels.
 
+## HotpotQA sample
+
+HotpotQA does not ship as explicit `doc1` / `doc2` contrastive pairs. The loader
+maps supporting-fact paragraphs to `doc1` and the highest-overlap non-supporting
+paragraph from the same example to `doc2`.
+
+```bash
+python scripts/setup_hotpotqa_sample.py \
+  --config distractor \
+  --split train \
+  --sample-size 1000 \
+  --seed 42
+```
+
 ## Steps 2-5: Local retrieval, decomposition, reranking, evaluation
 
 ```bash
