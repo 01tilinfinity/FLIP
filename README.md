@@ -82,6 +82,16 @@ python scripts/sweep_score_anti_rrf.py \
   --output-dir results/score_anti_rrf
 ```
 
+For larger samples, use the summary-only fast sweep:
+
+```bash
+python scripts/fast_score_anti_rrf_sweep.py \
+  --sample-csv data/hotpotqa_distractor_train_1000_seed42.csv \
+  --decompositions-jsonl outputs/hotpotqa_1000_bm25_heuristic/query_decompositions.jsonl \
+  --retriever both \
+  --output-dir results/hotpotqa_1000_score_anti_rrf
+```
+
 Softer variants add hinge penalties and confidence gates:
 
 ```bash

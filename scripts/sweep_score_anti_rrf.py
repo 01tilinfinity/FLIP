@@ -18,6 +18,7 @@ from run_kflip_experiment import (
     evaluate_rankings,
     load_decompositions,
     load_sample,
+    ranked_results,
     to_rank_dict,
 )
 
@@ -44,6 +45,11 @@ def parse_args() -> argparse.Namespace:
     )
     parser.add_argument("--top-k", type=int, default=3)
     parser.add_argument("--max-samples", type=int, default=None)
+    parser.add_argument(
+        "--write-details",
+        action="store_true",
+        help="Write per-sample detail rows for every configuration.",
+    )
     return parser.parse_args()
 
 
@@ -108,6 +114,30 @@ def precompute_searches(
     retriever: BM25Retriever | DenseRetriever,
     decompositions: list[dict[str, str]],
 ) -> dict[str, dict[str, list[SearchResult]]]:
+    if isinstance(retriever, DenseRetriever):
+        sample_ids = [str(row["id"]) for _, row in sample.iterrows()]
+        baseline_queries = [str(row["query"]) for _, row in sample.iterrows()]
+        target_queries = [decomposition["Q_target"] for decomposition in decompositions]
+        trap_queries = [decomposition["Q_trap"] for decomposition in decompositions]
+        all_queries = baseline_queries + target_queries + trap_queries
+        query_embeddings = retriever.model.encode(
+            all_queries,
+            batch_size=64,
+            convert_to_numpy=True,
+            normalize_embeddings=True,
+            show_progress_bar=False,
+        )
+        scores = np.dot(query_embeddings, retriever.doc_embeddings.T)
+        searches: dict[str, dict[str, list[SearchResult]]] = {}
+        size = len(sample_ids)
+        for index, sample_id in enumerate(sample_ids):
+            searches[sample_id] = {
+                "baseline": ranked_results(retriever.corpus.doc_ids, scores[index]),
+                "target": ranked_results(retriever.corpus.doc_ids, scores[size + index]),
+                "trap": ranked_results(retriever.corpus.doc_ids, scores[2 * size + index]),
+            }
+        return searches
+
     searches: dict[str, dict[str, list[SearchResult]]] = {}
     for decomposition, (_, row) in zip(decompositions, sample.iterrows(), strict=True):
         sample_id = str(row["id"])
@@ -211,7 +241,8 @@ def main() -> None:
         baseline_summary["beta"] = ""
         baseline_summary["candidate_top_n"] = ""
         summary_rows.append(baseline_summary)
-        detail_rows.extend(baseline_details)
+        if args.write_details:
+            detail_rows.extend(baseline_details)
 
         for candidate_top_n in candidate_top_ns:
             for alpha in alphas:
@@ -227,14 +258,16 @@ def main() -> None:
                         top_k=args.top_k,
                     )
                     summary_rows.append(summary)
-                    detail_rows.extend(details)
+                    if args.write_details:
+                        detail_rows.extend(details)
 
     summary_df = pd.DataFrame(summary_rows)
-    detail_df = pd.DataFrame(detail_rows)
     summary_path = output_dir / "score_anti_rrf_sweep.csv"
     detail_path = output_dir / "score_anti_rrf_details.csv"
     summary_df.to_csv(summary_path, index=False)
-    detail_df.to_csv(detail_path, index=False)
+    if args.write_details:
+        detail_df = pd.DataFrame(detail_rows)
+        detail_df.to_csv(detail_path, index=False)
 
     top_df = summary_df[summary_df["method"] != "baseline"].copy()
     top_df["recall_minus_violation"] = top_df["recall@3"] - top_df["violation_rate@3"]
@@ -246,7 +279,8 @@ def main() -> None:
     top_df.head(25).to_csv(top_path, index=False)
 
     print(f"Summary: {summary_path}")
-    print(f"Details: {detail_path}")
+    if args.write_details:
+        print(f"Details: {detail_path}")
     print(f"Top configs: {top_path}")
     print()
     print(top_df.head(12).to_string(index=False))
