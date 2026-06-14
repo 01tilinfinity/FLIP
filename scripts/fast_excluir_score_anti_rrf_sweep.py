@@ -59,10 +59,29 @@ def parse_args() -> argparse.Namespace:
         action="store_true",
         help="Load the dense model only from the local Hugging Face cache.",
     )
+    parser.add_argument(
+        "--save-score-matrix-path",
+        default=None,
+        help="Optional .npz path to save baseline, target, and trap score matrices.",
+    )
+    parser.add_argument(
+        "--load-score-matrix-path",
+        default=None,
+        help="Optional .npz path to reuse previously saved score matrices.",
+    )
     parser.add_argument("--cache-dir", default="data/excluir_cache")
     parser.add_argument("--alphas", default="0,0.25,0.5,0.75,1")
     parser.add_argument("--betas", default="0.3,0.5,0.75,1")
     parser.add_argument("--candidate-top-ns", default="5,10,20,all")
+    parser.add_argument(
+        "--score-mode",
+        choices=("full", "no_target"),
+        default="full",
+        help=(
+            "full: alpha * baseline_score + target_score - beta * trap_score; "
+            "no_target: alpha * baseline_score - beta * trap_score"
+        ),
+    )
     parser.add_argument(
         "--top-ks",
         default="3,5,7,9",
@@ -327,6 +346,9 @@ def run_retriever(
     query_batch_size: int,
     retriever_label: str,
     top_ks: list[int],
+    score_mode: str,
+    save_score_matrix_path: Path | None,
+    load_score_matrix_path: Path | None,
 ) -> list[dict]:
     queries = [str(row["query"]) for _, row in sample.iterrows()]
     targets = [decomposition["Q_target"] for decomposition in decompositions]
@@ -334,22 +356,44 @@ def run_retriever(
     answer_indices = sample["positive_corpus_index"].to_numpy(dtype=int)
     trap_indices = sample["negative_corpus_index"].to_numpy(dtype=int)
 
-    print(f"Scoring {retriever}", flush=True)
-    baseline_scores, target_scores, trap_scores = score_matrices(
-        retriever=retriever,
-        corpus=corpus,
-        queries=queries,
-        targets=targets,
-        traps=traps,
-        dense_model=dense_model,
-        cache_dir=cache_dir,
-        local_files_only=local_files_only,
-        trust_remote_code=trust_remote_code,
-        query_prompt_name=query_prompt_name,
-        model_dtype=model_dtype,
-        doc_batch_size=doc_batch_size,
-        query_batch_size=query_batch_size,
-    )
+    if load_score_matrix_path is not None:
+        print(f"Loading score matrices: {load_score_matrix_path}", flush=True)
+        matrices = np.load(load_score_matrix_path)
+        baseline_scores = matrices["baseline_scores"]
+        target_scores = matrices["target_scores"]
+        trap_scores = matrices["trap_scores"]
+    else:
+        print(f"Scoring {retriever}", flush=True)
+        baseline_scores, target_scores, trap_scores = score_matrices(
+            retriever=retriever,
+            corpus=corpus,
+            queries=queries,
+            targets=targets,
+            traps=traps,
+            dense_model=dense_model,
+            cache_dir=cache_dir,
+            local_files_only=local_files_only,
+            trust_remote_code=trust_remote_code,
+            query_prompt_name=query_prompt_name,
+            model_dtype=model_dtype,
+            doc_batch_size=doc_batch_size,
+            query_batch_size=query_batch_size,
+        )
+
+    if save_score_matrix_path is not None:
+        print(f"Saving score matrices: {save_score_matrix_path}", flush=True)
+        save_score_matrix_path.parent.mkdir(parents=True, exist_ok=True)
+        np.savez_compressed(
+            save_score_matrix_path,
+            baseline_scores=baseline_scores,
+            target_scores=target_scores,
+            trap_scores=trap_scores,
+            answer_indices=answer_indices,
+            trap_indices=trap_indices,
+            queries=np.array(queries, dtype=object),
+            targets=np.array(targets, dtype=object),
+            traps=np.array(traps, dtype=object),
+        )
 
     baseline_answer_ranks = rank_positions(baseline_scores, answer_indices)
     baseline_trap_ranks = rank_positions(baseline_scores, trap_indices)
@@ -383,7 +427,12 @@ def run_retriever(
 
         for alpha in alphas:
             for beta in betas:
-                final_scores = alpha * baseline_norm + target_norm - beta * trap_norm
+                if score_mode == "no_target":
+                    final_scores = alpha * baseline_norm - beta * trap_norm
+                    method_prefix = "score_anti_rrf_no_target"
+                else:
+                    final_scores = alpha * baseline_norm + target_norm - beta * trap_norm
+                    method_prefix = "score_anti_rrf"
                 if candidate_mask is None:
                     answer_ranks = rank_positions(final_scores, answer_indices)
                     trap_ranks = rank_positions(final_scores, trap_indices)
@@ -404,7 +453,7 @@ def run_retriever(
                 rows.append(
                     evaluate_summary(
                         retriever=retriever_label,
-                        method=f"score_anti_rrf_c{candidate_label}_a{alpha:g}_b{beta:g}",
+                        method=f"{method_prefix}_c{candidate_label}_a{alpha:g}_b{beta:g}",
                         answer_ranks=answer_ranks,
                         trap_ranks=trap_ranks,
                         top_ks=top_ks,
@@ -460,6 +509,17 @@ def main() -> None:
                 query_batch_size=args.dense_query_batch_size,
                 retriever_label=retriever_label,
                 top_ks=top_ks,
+                score_mode=args.score_mode,
+                save_score_matrix_path=(
+                    Path(args.save_score_matrix_path)
+                    if args.save_score_matrix_path
+                    else None
+                ),
+                load_score_matrix_path=(
+                    Path(args.load_score_matrix_path)
+                    if args.load_score_matrix_path
+                    else None
+                ),
             )
         )
 

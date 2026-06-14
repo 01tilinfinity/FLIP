@@ -14,3 +14,4 @@ data/excluir_cache/
 outputs/
 results/**/score_anti_rrf_details.csv
 results/**/improved_anti_rrf_details.csv
+results/score_matrices/
