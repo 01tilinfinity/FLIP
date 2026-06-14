@@ -9,6 +9,8 @@ __pycache__/
 *.token
 .cache/
 hf_cache/
+data/excluir_raw/
+data/excluir_cache/
 outputs/
 results/**/score_anti_rrf_details.csv
 results/**/improved_anti_rrf_details.csv
