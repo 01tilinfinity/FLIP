@@ -226,7 +226,7 @@ def parse_decomposition_json(content: str) -> dict[str, str]:
     trap = parsed.get("Q_trap")
     if not isinstance(target, str) or not target.strip():
         raise ValueError("Decomposition response is missing Q_target")
-    if not isinstance(trap, str) or not trap.strip():
+    if not isinstance(trap, str):
         raise ValueError("Decomposition response is missing Q_trap")
     return {"Q_target": target.strip(), "Q_trap": trap.strip()}
 

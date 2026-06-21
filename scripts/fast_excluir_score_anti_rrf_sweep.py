@@ -6,18 +6,22 @@ from __future__ import annotations
 import argparse
 import json
 import re
+import time
 from pathlib import Path
 
 import numpy as np
 import pandas as pd
-from rank_bm25 import BM25Okapi
-from sentence_transformers import SentenceTransformer
-
-from run_kflip_experiment import load_decompositions
-from sweep_score_anti_rrf import parse_candidate_list, parse_float_list
 
 
 TOKEN_RE = re.compile(r"[A-Za-z0-9]+")
+
+
+def load_dotenv_if_available() -> None:
+    try:
+        from dotenv import load_dotenv
+    except ImportError:
+        return
+    load_dotenv(dotenv_path=Path(".env"))
 
 
 def parse_args() -> argparse.Namespace:
@@ -32,12 +36,30 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--retriever", choices=("bm25", "dense", "both"), default="both")
     parser.add_argument("--dense-model", default="sentence-transformers/all-MiniLM-L6-v2")
     parser.add_argument(
+        "--dense-backend",
+        choices=("auto", "sentence_transformers", "openai"),
+        default="auto",
+        help="Embedding backend for dense retrieval. Auto uses OpenAI for text-embedding-* models.",
+    )
+    parser.add_argument(
         "--retriever-label",
         default=None,
         help="Label to write in result CSVs for a dense model.",
     )
     parser.add_argument("--dense-doc-batch-size", type=int, default=64)
     parser.add_argument("--dense-query-batch-size", type=int, default=64)
+    parser.add_argument(
+        "--openai-max-batch-tokens",
+        type=int,
+        default=250000,
+        help="Approximate max tokens per OpenAI embeddings request batch.",
+    )
+    parser.add_argument(
+        "--openai-max-input-tokens",
+        type=int,
+        default=8191,
+        help="Truncate individual OpenAI embedding inputs to this many tokens.",
+    )
     parser.add_argument(
         "--trust-remote-code",
         action="store_true",
@@ -71,15 +93,24 @@ def parse_args() -> argparse.Namespace:
     )
     parser.add_argument("--cache-dir", default="data/excluir_cache")
     parser.add_argument("--alphas", default="0,0.25,0.5,0.75,1")
+    parser.add_argument(
+        "--gammas",
+        default=None,
+        help=(
+            "Comma-separated target weights for --score-mode target_minus_trap. "
+            "Defaults to --alphas for backward compatibility."
+        ),
+    )
     parser.add_argument("--betas", default="0.3,0.5,0.75,1")
     parser.add_argument("--candidate-top-ns", default="5,10,20,all")
     parser.add_argument(
         "--score-mode",
-        choices=("full", "no_target"),
+        choices=("full", "no_target", "target_minus_trap"),
         default="full",
         help=(
             "full: alpha * baseline_score + target_score - beta * trap_score; "
-            "no_target: alpha * baseline_score - beta * trap_score"
+            "no_target: alpha * baseline_score - beta * trap_score; "
+            "target_minus_trap: gamma * target_score - beta * trap_score"
         ),
     )
     parser.add_argument(
@@ -105,6 +136,46 @@ def parse_int_list(value: str) -> list[int]:
     if not items:
         raise ValueError("At least one top-k cutoff is required.")
     return sorted(set(items))
+
+
+def parse_float_list(value: str) -> list[float]:
+    return [float(item.strip()) for item in value.split(",") if item.strip()]
+
+
+def parse_candidate_list(value: str) -> list[int | None]:
+    candidates: list[int | None] = []
+    for item in value.split(","):
+        item = item.strip().lower()
+        if not item:
+            continue
+        candidates.append(None if item in {"all", "none"} else int(item))
+    return candidates
+
+
+def parse_decomposition_json(content: str) -> dict[str, str]:
+    parsed = json.loads(content)
+    if not isinstance(parsed, dict):
+        raise ValueError("Decomposition response must be a JSON object")
+    target = parsed.get("Q_target", parsed.get("q_target"))
+    trap = parsed.get("Q_trap", parsed.get("q_trap"))
+    if not isinstance(target, str) or not target.strip():
+        raise ValueError("Decomposition response is missing Q_target")
+    if not isinstance(trap, str):
+        raise ValueError("Decomposition response is missing Q_trap")
+    return {"Q_target": target.strip(), "Q_trap": trap.strip()}
+
+
+def load_decompositions(path: Path, sample: pd.DataFrame) -> list[dict[str, str]]:
+    by_id = {}
+    with path.open(encoding="utf-8") as handle:
+        for line in handle:
+            row = json.loads(line)
+            by_id[str(row["id"])] = parse_decomposition_json(json.dumps(row, ensure_ascii=False))
+
+    missing = [str(row["id"]) for _, row in sample.iterrows() if str(row["id"]) not in by_id]
+    if missing:
+        raise ValueError(f"Cached decomposition file is missing ids: {missing[:5]}")
+    return [by_id[str(row["id"])] for _, row in sample.iterrows()]
 
 
 def minmax_rows(values: np.ndarray, mask: np.ndarray | None = None) -> np.ndarray:
@@ -182,6 +253,8 @@ def evaluate_summary(
 
 
 def bm25_scores(corpus: list[str], queries: list[str]) -> np.ndarray:
+    from rank_bm25 import BM25Okapi
+
     bm25 = BM25Okapi([tokenize(document) for document in corpus])
     rows = []
     for index, query in enumerate(queries, start=1):
@@ -199,13 +272,27 @@ def model_kwargs_for_dtype(dtype: str) -> dict:
     return {"torch_dtype": getattr(torch, dtype)}
 
 
+def l2_normalize(embeddings: np.ndarray) -> np.ndarray:
+    norms = np.linalg.norm(embeddings, axis=1, keepdims=True)
+    norms = np.where(norms == 0, 1.0, norms)
+    return (embeddings / norms).astype(np.float32)
+
+
+def dense_backend_for_model(model_name: str, backend: str) -> str:
+    if backend != "auto":
+        return backend
+    return "openai" if model_name.startswith("text-embedding-") else "sentence_transformers"
+
+
 def load_dense_model(
     *,
     model_name: str,
     local_files_only: bool,
     trust_remote_code: bool,
     model_dtype: str,
-) -> SentenceTransformer:
+):
+    from sentence_transformers import SentenceTransformer
+
     kwargs = {
         "local_files_only": local_files_only,
         "trust_remote_code": trust_remote_code,
@@ -228,7 +315,7 @@ def load_dense_model(
 
 
 def encode_dense(
-    model: SentenceTransformer,
+    model,
     texts: list[str],
     *,
     batch_size: int,
@@ -245,6 +332,148 @@ def encode_dense(
     return model.encode(texts, **kwargs).astype(np.float32)
 
 
+def openai_encoding_for_model(model_name: str):
+    import tiktoken
+
+    try:
+        return tiktoken.encoding_for_model(model_name)
+    except KeyError:
+        return tiktoken.get_encoding("cl100k_base")
+
+
+def truncate_openai_text(text: str, *, encoding, max_tokens: int) -> str:
+    tokens = encoding.encode(text)
+    if len(tokens) <= max_tokens:
+        return text
+    return encoding.decode(tokens[:max_tokens])
+
+
+def openai_batches(
+    indexed_texts: list[tuple[int, str]],
+    *,
+    model_name: str,
+    batch_size: int,
+    max_batch_tokens: int,
+    max_input_tokens: int,
+):
+    encoding = openai_encoding_for_model(model_name)
+    batch_indices: list[int] = []
+    batch_texts: list[str] = []
+    batch_tokens = 0
+    for index, text in indexed_texts:
+        truncated = truncate_openai_text(
+            str(text),
+            encoding=encoding,
+            max_tokens=max_input_tokens,
+        )
+        token_count = len(encoding.encode(truncated))
+        if batch_texts and (
+            len(batch_texts) >= batch_size
+            or batch_tokens + token_count > max_batch_tokens
+        ):
+            yield batch_indices, batch_texts
+            batch_indices = []
+            batch_texts = []
+            batch_tokens = 0
+        batch_indices.append(index)
+        batch_texts.append(truncated)
+        batch_tokens += token_count
+    if batch_texts:
+        yield batch_indices, batch_texts
+
+
+def encode_openai(
+    texts: list[str],
+    *,
+    model_name: str,
+    batch_size: int,
+    max_batch_tokens: int,
+    max_input_tokens: int,
+) -> np.ndarray:
+    from openai import OpenAI
+
+    client = OpenAI()
+    non_empty_texts = [
+        (index, str(text))
+        for index, text in enumerate(texts)
+        if str(text).strip()
+    ]
+    empty_count = len(texts) - len(non_empty_texts)
+    if empty_count:
+        print(f"OpenAI embedding: using zero vectors for {empty_count} empty inputs", flush=True)
+    embeddings_by_index: dict[int, list[float]] = {}
+    total = len(texts)
+    processed = 0
+    for batch_indices, batch in openai_batches(
+        non_empty_texts,
+        model_name=model_name,
+        batch_size=batch_size,
+        max_batch_tokens=max_batch_tokens,
+        max_input_tokens=max_input_tokens,
+    ):
+        for attempt in range(6):
+            try:
+                response = client.embeddings.create(model=model_name, input=batch)
+                break
+            except Exception:
+                if attempt == 5:
+                    raise
+                time.sleep(2 ** attempt)
+        ordered = sorted(response.data, key=lambda item: item.index)
+        for original_index, item in zip(batch_indices, ordered):
+            embeddings_by_index[original_index] = item.embedding
+        processed += len(batch)
+        print(f"OpenAI embedding {processed + empty_count}/{total}", flush=True)
+
+    if embeddings_by_index:
+        embedding_dim = len(next(iter(embeddings_by_index.values())))
+    else:
+        raise ValueError("OpenAI embedding input contains no non-empty texts.")
+    embeddings = np.zeros((len(texts), embedding_dim), dtype=np.float32)
+    for index, embedding in embeddings_by_index.items():
+        embeddings[index] = np.asarray(embedding, dtype=np.float32)
+    return l2_normalize(embeddings)
+
+
+def openai_score_matrices(
+    *,
+    corpus: list[str],
+    queries: list[str],
+    targets: list[str],
+    traps: list[str],
+    model_name: str,
+    cache_dir: Path,
+    batch_size: int,
+    max_batch_tokens: int,
+    max_input_tokens: int,
+) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
+    safe_model = model_name.replace("/", "__")
+    embedding_path = cache_dir / f"corpus_{safe_model}.npy"
+    if embedding_path.exists():
+        doc_embeddings = np.load(embedding_path)
+    else:
+        doc_embeddings = encode_openai(
+            corpus,
+            model_name=model_name,
+            batch_size=batch_size,
+            max_batch_tokens=max_batch_tokens,
+            max_input_tokens=max_input_tokens,
+        )
+        np.save(embedding_path, doc_embeddings)
+
+    all_queries = queries + targets + traps
+    query_embeddings = encode_openai(
+        all_queries,
+        model_name=model_name,
+        batch_size=batch_size,
+        max_batch_tokens=max_batch_tokens,
+        max_input_tokens=max_input_tokens,
+    )
+    scores = np.dot(query_embeddings, doc_embeddings.T).astype(np.float32)
+    size = len(queries)
+    return scores[:size], scores[size : 2 * size], scores[2 * size :]
+
+
 def dense_score_matrices(
     *,
     corpus: list[str],
@@ -259,8 +488,24 @@ def dense_score_matrices(
     model_dtype: str,
     doc_batch_size: int,
     query_batch_size: int,
+    dense_backend: str,
+    openai_max_batch_tokens: int,
+    openai_max_input_tokens: int,
 ) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
     cache_dir.mkdir(parents=True, exist_ok=True)
+    if dense_backend_for_model(model_name, dense_backend) == "openai":
+        return openai_score_matrices(
+            corpus=corpus,
+            queries=queries,
+            targets=targets,
+            traps=traps,
+            model_name=model_name,
+            cache_dir=cache_dir,
+            batch_size=doc_batch_size,
+            max_batch_tokens=openai_max_batch_tokens,
+            max_input_tokens=openai_max_input_tokens,
+        )
+
     model = load_dense_model(
         model_name=model_name,
         local_files_only=local_files_only,
@@ -306,6 +551,9 @@ def score_matrices(
     model_dtype: str,
     doc_batch_size: int,
     query_batch_size: int,
+    dense_backend: str,
+    openai_max_batch_tokens: int,
+    openai_max_input_tokens: int,
 ) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
     if retriever == "bm25":
         all_scores = bm25_scores(corpus, queries + targets + traps)
@@ -324,6 +572,9 @@ def score_matrices(
         model_dtype=model_dtype,
         doc_batch_size=doc_batch_size,
         query_batch_size=query_batch_size,
+        dense_backend=dense_backend,
+        openai_max_batch_tokens=openai_max_batch_tokens,
+        openai_max_input_tokens=openai_max_input_tokens,
     )
 
 
@@ -344,6 +595,9 @@ def run_retriever(
     model_dtype: str,
     doc_batch_size: int,
     query_batch_size: int,
+    dense_backend: str,
+    openai_max_batch_tokens: int,
+    openai_max_input_tokens: int,
     retriever_label: str,
     top_ks: list[int],
     score_mode: str,
@@ -378,6 +632,9 @@ def run_retriever(
             model_dtype=model_dtype,
             doc_batch_size=doc_batch_size,
             query_batch_size=query_batch_size,
+            dense_backend=dense_backend,
+            openai_max_batch_tokens=openai_max_batch_tokens,
+            openai_max_input_tokens=openai_max_input_tokens,
         )
 
     if save_score_matrix_path is not None:
@@ -404,7 +661,7 @@ def run_retriever(
             answer_ranks=baseline_answer_ranks,
             trap_ranks=baseline_trap_ranks,
             top_ks=top_ks,
-            extra={"alpha": "", "beta": "", "candidate_top_n": ""},
+            extra={"alpha": "", "gamma": "", "beta": "", "candidate_top_n": ""},
         )
     ]
 
@@ -430,9 +687,18 @@ def run_retriever(
                 if score_mode == "no_target":
                     final_scores = alpha * baseline_norm - beta * trap_norm
                     method_prefix = "score_anti_rrf_no_target"
+                    weight_label = "a"
+                    gamma = ""
+                elif score_mode == "target_minus_trap":
+                    final_scores = alpha * target_norm - beta * trap_norm
+                    method_prefix = "score_target_minus_trap"
+                    weight_label = "g"
+                    gamma = alpha
                 else:
                     final_scores = alpha * baseline_norm + target_norm - beta * trap_norm
                     method_prefix = "score_anti_rrf"
+                    weight_label = "a"
+                    gamma = ""
                 if candidate_mask is None:
                     answer_ranks = rank_positions(final_scores, answer_indices)
                     trap_ranks = rank_positions(final_scores, trap_indices)
@@ -453,12 +719,16 @@ def run_retriever(
                 rows.append(
                     evaluate_summary(
                         retriever=retriever_label,
-                        method=f"{method_prefix}_c{candidate_label}_a{alpha:g}_b{beta:g}",
+                        method=(
+                            f"{method_prefix}_c{candidate_label}_"
+                            f"{weight_label}{alpha:g}_b{beta:g}"
+                        ),
                         answer_ranks=answer_ranks,
                         trap_ranks=trap_ranks,
                         top_ks=top_ks,
                         extra={
                             "alpha": alpha,
+                            "gamma": gamma,
                             "beta": beta,
                             "candidate_top_n": candidate_label,
                         },
@@ -468,6 +738,7 @@ def run_retriever(
 
 
 def main() -> None:
+    load_dotenv_if_available()
     args = parse_args()
     output_dir = Path(args.output_dir)
     output_dir.mkdir(parents=True, exist_ok=True)
@@ -476,7 +747,7 @@ def main() -> None:
     with Path(args.corpus_json).open(encoding="utf-8") as handle:
         corpus = json.load(handle)
     decompositions = load_decompositions(Path(args.decompositions_jsonl), sample)
-    alphas = parse_float_list(args.alphas)
+    alphas = parse_float_list(args.gammas if args.gammas else args.alphas)
     betas = parse_float_list(args.betas)
     candidate_top_ns = parse_candidate_list(args.candidate_top_ns)
     top_ks = [args.top_k] if args.top_k is not None else parse_int_list(args.top_ks)
@@ -507,6 +778,9 @@ def main() -> None:
                 model_dtype=args.model_dtype,
                 doc_batch_size=args.dense_doc_batch_size,
                 query_batch_size=args.dense_query_batch_size,
+                dense_backend=args.dense_backend,
+                openai_max_batch_tokens=args.openai_max_batch_tokens,
+                openai_max_input_tokens=args.openai_max_input_tokens,
                 retriever_label=retriever_label,
                 top_ks=top_ks,
                 score_mode=args.score_mode,

@@ -1,0 +1,4 @@
+method,gamma/alpha,beta,candidate_top_n,Recall@3,Violation@3,Gap@3,Recall@5,Violation@5,Gap@5,Avg Gap,Right Rank
+BGE-M3 baseline,,,,0.922,0.819,0.103,0.940,0.876,0.064,0.066,0.670
+baseline_minus_trap,1.0,0.75,all,0.685,0.099,0.586,0.722,0.115,0.607,0.608,0.874
+target_minus_trap,0.25,0.1,all,0.864,0.087,0.777,0.890,0.102,0.788,0.785,0.942

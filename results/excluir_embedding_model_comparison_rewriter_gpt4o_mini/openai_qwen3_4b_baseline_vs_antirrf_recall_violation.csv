@@ -1,0 +1,5 @@
+embedding,method,recall@3,violation@3
+OpenAI text-embedding-3-small,Baseline,0.931,0.835
+OpenAI text-embedding-3-small,Anti-RRF best target-minus-trap,0.860,0.077
+Qwen3-Embedding-4B,Baseline,0.934,0.692
+Qwen3-Embedding-4B,Anti-RRF best target-minus-trap,0.893,0.077
