@@ -101,6 +101,72 @@ python scripts/sweep_improved_anti_rrf.py \
   --output-dir results/improved_anti_rrf
 ```
 
+## ExcluIR direct rewrite-to-score experiments
+
+The current ExcluIR experiment removes oracle target/trap queries from scoring.
+It first rewrites each original query into inferred `q_target` and `q_trap`
+with GPT-4o mini, then scores the full ExcluIR corpus directly with dense
+embeddings.
+
+Canonical prompt:
+
+```text
+prompts/excluir_rewriter_gpt4o_mini_system.txt
+```
+
+Generate or resume rewrites:
+
+```bash
+python scripts/generate_excluir_rewrites.py \
+  --sample-csv data/excluir_manual_1000_seed42.csv \
+  --output-jsonl outputs/excluir_rewriter_gpt4o_mini/decompositions.jsonl \
+  --model gpt-4o-mini \
+  --workers 8
+```
+
+Run the latest direct scoring sweep:
+
+```bash
+scripts/run_excluir_rewriter_direct_score_experiment.sh all
+```
+
+Available presets:
+
+```text
+all
+bge-m3
+qwen3-0.6b
+qwen3-4b
+openai-small
+```
+
+The runner evaluates:
+
+```text
+baseline:           score(d) = sim(RQ_rewrite, d)
+baseline_minus_trap: final(d) = alpha * sim(RQ_rewrite, d) - beta * sim(q_trap, d)
+target_minus_trap:   final(d) = gamma * sim(q_target, d) - beta * sim(q_trap, d)
+```
+
+Summarize embedding-model comparisons:
+
+```bash
+python scripts/summarize_excluir_embedding_model_comparison.py
+```
+
+Latest tracked result summaries:
+
+- `results/excluir_embedding_model_comparison_rewriter_gpt4o_mini/embedding_model_comparison_summary.md`
+- `results/excluir_embedding_model_comparison_rewriter_gpt4o_mini/openai_qwen3_4b_baseline_vs_antirrf_recall_violation.csv`
+- `results/excluir_embedding_model_comparison_rewriter_gpt4o_mini/direct_rewrite_to_score_summary.md`
+
+Large local artifacts are intentionally not tracked:
+
+- `data/excluir_raw/`
+- `data/excluir_cache/`
+- `results/score_matrices/`
+- `logs/`
+
 Outputs:
 
 - `outputs/query_decompositions.jsonl`
