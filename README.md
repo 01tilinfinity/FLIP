@@ -108,20 +108,42 @@ It first rewrites each original query into inferred `q_target` and `q_trap`
 with GPT-4o mini, then scores the full ExcluIR corpus directly with dense
 embeddings.
 
-Canonical prompt:
+Prompt versions are kept as immutable experiment artifacts:
 
 ```text
-prompts/excluir_rewriter_gpt4o_mini_system.txt
+prompts/excluir_rewriter_gpt4o_mini/
 ```
+
+Do not overwrite a prompt version after using it. Add a new `v*_system.txt`
+file and write decompositions to a matching versioned output directory.
 
 Generate or resume rewrites:
 
 ```bash
 python scripts/generate_excluir_rewrites.py \
   --sample-csv data/excluir_manual_1000_seed42.csv \
-  --output-jsonl outputs/excluir_rewriter_gpt4o_mini/decompositions.jsonl \
+  --system-prompt-path prompts/excluir_rewriter_gpt4o_mini/v1_base_system.txt \
+  --output-jsonl outputs/excluir_rewriter_gpt4o_mini_v1_base/decompositions.jsonl \
   --model gpt-4o-mini \
   --workers 8
+```
+
+Each generated row records `system_prompt_path` and `system_prompt_sha256` so
+recall/violation scores can be traced back to the exact prompt version.
+
+For a new prompt version, create a new prompt file and keep the decomposition
+and score outputs under the same tag:
+
+```bash
+python scripts/generate_excluir_rewrites.py \
+  --system-prompt-path prompts/excluir_rewriter_gpt4o_mini/v2_short_trap_system.txt \
+  --output-jsonl outputs/excluir_rewriter_gpt4o_mini_v2_short_trap/decompositions.jsonl \
+  --model gpt-4o-mini \
+  --workers 8
+
+EXPERIMENT_TAG=rewriter_gpt4o_mini_v2_short_trap \
+DECOMPOSITIONS_JSONL=outputs/excluir_rewriter_gpt4o_mini_v2_short_trap/decompositions.jsonl \
+scripts/run_excluir_rewriter_direct_score_experiment.sh all
 ```
 
 Run the latest direct scoring sweep:

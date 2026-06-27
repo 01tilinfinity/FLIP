@@ -8,6 +8,7 @@ __pycache__/
 *.pem
 *.token
 .cache/
+.vscode/
 hf_cache/
 logs/
 data/excluir_raw/
@@ -16,3 +17,13 @@ outputs/
 results/**/score_anti_rrf_details.csv
 results/**/improved_anti_rrf_details.csv
 results/score_matrices/
+
+# LaTeX build artifacts
+paper/latex/*.aux
+paper/latex/*.bbl
+paper/latex/*.blg
+paper/latex/*.fdb_latexmk
+paper/latex/*.fls
+paper/latex/*.log
+paper/latex/*.out
+paper/latex/*.pdf

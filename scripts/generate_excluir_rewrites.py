@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import argparse
 import csv
+import hashlib
 import json
 import os
 import time
@@ -15,7 +16,7 @@ from typing import Any
 from openai import OpenAI
 
 
-DEFAULT_SYSTEM_PROMPT_PATH = Path("prompts/excluir_rewriter_gpt4o_mini_system.txt")
+DEFAULT_SYSTEM_PROMPT_PATH = Path("prompts/excluir_rewriter_gpt4o_mini/v1_base_system.txt")
 
 
 USER_TEMPLATE = """Now decompose the following query.
@@ -35,7 +36,10 @@ Return only valid JSON. Do not include markdown, comments, explanations, or extr
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Generate inferred ExcluIR decompositions.")
     parser.add_argument("--sample-csv", default="data/excluir_manual_1000_seed42.csv")
-    parser.add_argument("--output-jsonl", default="outputs/excluir_rewriter_gpt4o_mini/decompositions.jsonl")
+    parser.add_argument(
+        "--output-jsonl",
+        default="outputs/excluir_rewriter_gpt4o_mini_v1_base/decompositions.jsonl",
+    )
     parser.add_argument("--system-prompt-path", default=str(DEFAULT_SYSTEM_PROMPT_PATH))
     parser.add_argument("--model", default="gpt-4o-mini")
     parser.add_argument("--query-column", default="query")
@@ -44,11 +48,20 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--sleep-seconds", type=float, default=0.0)
     parser.add_argument("--max-retries", type=int, default=5)
     parser.add_argument("--workers", type=int, default=1)
+    parser.add_argument(
+        "--allow-mixed-prompt-output",
+        action="store_true",
+        help="Allow appending rows generated with a different recorded prompt hash.",
+    )
     return parser.parse_args()
 
 
 def load_system_prompt(path: Path) -> str:
     return path.read_text(encoding="utf-8").strip()
+
+
+def file_sha256(path: Path) -> str:
+    return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
 def load_dotenv(path: Path = Path(".env")) -> None:
@@ -96,6 +109,23 @@ def load_done_ids(path: Path) -> set[str]:
             except Exception:
                 continue
     return done
+
+
+def load_recorded_prompt_hashes(path: Path) -> set[str]:
+    if not path.exists():
+        return set()
+    hashes = set()
+    with path.open(encoding="utf-8") as handle:
+        for line in handle:
+            if not line.strip():
+                continue
+            try:
+                prompt_hash = json.loads(line).get("system_prompt_sha256")
+            except Exception:
+                continue
+            if isinstance(prompt_hash, str) and prompt_hash:
+                hashes.add(prompt_hash)
+    return hashes
 
 
 def parse_json_response(content: str) -> dict[str, str]:
@@ -149,7 +179,19 @@ def main() -> None:
     output_path.parent.mkdir(parents=True, exist_ok=True)
 
     rows = load_rows(Path(args.sample_csv), args.query_column, args.max_samples)
-    system_prompt = load_system_prompt(Path(args.system_prompt_path))
+    system_prompt_path = Path(args.system_prompt_path)
+    system_prompt = load_system_prompt(system_prompt_path)
+    system_prompt_sha256 = file_sha256(system_prompt_path)
+    recorded_prompt_hashes = load_recorded_prompt_hashes(output_path)
+    if (
+        recorded_prompt_hashes
+        and system_prompt_sha256 not in recorded_prompt_hashes
+        and not args.allow_mixed_prompt_output
+    ):
+        raise ValueError(
+            f"{output_path} already contains rows from another prompt hash. "
+            "Use a version-specific --output-jsonl, or pass --allow-mixed-prompt-output."
+        )
     done_ids = load_done_ids(output_path)
     client = OpenAI()
 
@@ -173,6 +215,8 @@ def main() -> None:
             "Q_target": result["q_target"],
             "Q_trap": result["q_trap"],
             "rewriter_model": args.model,
+            "system_prompt_path": str(system_prompt_path),
+            "system_prompt_sha256": system_prompt_sha256,
             "usage": result["usage"],
         }
 

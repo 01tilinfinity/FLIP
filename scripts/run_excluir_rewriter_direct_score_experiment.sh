@@ -3,7 +3,8 @@ set -euo pipefail
 
 PRESET="${1:-all}"
 SAMPLE_CSV="${SAMPLE_CSV:-data/excluir_manual_1000_seed42.csv}"
-DECOMPOSITIONS_JSONL="${DECOMPOSITIONS_JSONL:-outputs/excluir_rewriter_gpt4o_mini/decompositions.jsonl}"
+EXPERIMENT_TAG="${EXPERIMENT_TAG:-rewriter_gpt4o_mini_v1_base}"
+DECOMPOSITIONS_JSONL="${DECOMPOSITIONS_JSONL:-outputs/excluir_rewriter_gpt4o_mini_v1_base/decompositions.jsonl}"
 CORPUS_JSON="${CORPUS_JSON:-data/excluir_raw/corpus.json}"
 ALPHAS="${ALPHAS:-0,0.25,0.5,0.75,1,1.5,2}"
 GAMMAS="${GAMMAS:-0.25,0.5,0.75,1,1.5,2}"
@@ -24,11 +25,11 @@ run_model() {
   shift 7
   local extra_args=("$@")
 
-  local matrix_path="results/score_matrices/excluir_1000_${slug}_rewriter_gpt4o_mini.npz"
-  local no_target_dir="results/excluir_1000_${slug}_rewriter_gpt4o_mini_no_target_top3579"
-  local target_dir="results/excluir_1000_${slug}_rewriter_gpt4o_mini_target_minus_trap_top3579"
-  local no_target_log="logs/${slug}_excluir_1000_rewriter_gpt4o_mini_no_target_top3579.log"
-  local target_log="logs/${slug}_excluir_1000_rewriter_gpt4o_mini_target_minus_trap_top3579.log"
+  local matrix_path="results/score_matrices/excluir_1000_${slug}_${EXPERIMENT_TAG}.npz"
+  local no_target_dir="results/excluir_1000_${slug}_${EXPERIMENT_TAG}_no_target_top3579"
+  local target_dir="results/excluir_1000_${slug}_${EXPERIMENT_TAG}_target_minus_trap_top3579"
+  local no_target_log="logs/${slug}_excluir_1000_${EXPERIMENT_TAG}_no_target_top3579.log"
+  local target_log="logs/${slug}_excluir_1000_${EXPERIMENT_TAG}_target_minus_trap_top3579.log"
 
   echo "Running ${preset}: baseline-minus-trap and target-minus-trap"
 

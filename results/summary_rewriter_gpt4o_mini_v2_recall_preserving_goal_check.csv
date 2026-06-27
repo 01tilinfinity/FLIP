@@ -1,0 +1,7 @@
+model,condition,strict_goal_configs,recall_kept_configs,recall_kept_avg_violation_lower_configs,best_strict_method,best_strict_candidate_top_n,best_strict_alpha,best_strict_gamma,best_strict_beta
+text-embedding-3-small,baseline - q_trap,7,9,9,score_anti_rrf_no_target_c10_a1_b0.1,10,1.0,,0.1
+Qwen/Qwen3-Embedding-0.6B,baseline - q_trap,0,1,1,,,,,
+Qwen/Qwen3-Embedding-4B,baseline - q_trap,0,0,0,,,,,
+text-embedding-3-small,q_target - q_trap,0,0,0,,,,,
+Qwen/Qwen3-Embedding-0.6B,q_target - q_trap,0,0,0,,,,,
+Qwen/Qwen3-Embedding-4B,q_target - q_trap,0,0,0,,,,,
