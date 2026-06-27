@@ -1,0 +1,4 @@
+model,baseline_recall@9,baseline_violation@9,reported_best_no_target_recall@9,reported_best_no_target_violation@9,same_aggressive_recall@9,same_aggressive_violation@9,reported_best_trap_removed_from_top9,reported_best_answer_lost_from_top9,qtrap_trap_doc_top9_rate,qtrap_answer_doc_top9_rate,qtrap_score_gap_T_minus_A_mean,qtrap_score_gap_T_minus_A_median
+openai-small,0.954,0.911,0.957,0.835,0.909,0.077,0.077,0.001,0.903,0.209,0.33932692,0.37764037
+qwen3-0.6b,0.957,0.787,0.957,0.713,0.898,0.051,0.074,0.001,0.903,0.146,0.35961115,0.3961503
+qwen3-4b,0.956,0.79,0.914,0.066,0.914,0.066,0.725,0.048,0.915,0.227,0.34629357,0.38084683

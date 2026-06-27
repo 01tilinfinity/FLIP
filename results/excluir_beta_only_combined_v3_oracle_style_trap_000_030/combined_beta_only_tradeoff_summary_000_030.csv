@@ -1,0 +1,7 @@
+embedding_model,condition,candidate_top_n,beta_min,beta_max,beta0_avg_recall,beta0_avg_violation,strict_tradeoff_start_beta_vs_original_baseline,avg_tradeoff_start_beta_vs_original_baseline,best_strict_beta,best_strict_avg_recall,best_strict_avg_violation,best_avg_kept_beta,best_avg_kept_avg_recall,best_avg_kept_avg_violation
+text-embedding-3-small,baseline - beta*q_trap,all,0.00,0.30,0.946,0.88225,0.06,0.17,0.13,0.94775,0.7845,0.28,0.946,0.5955
+text-embedding-3-small,target - beta*q_trap,all,0.00,0.30,0.9332499999999999,0.31975,0.01,0.01,,,,,,
+Qwen/Qwen3-Embedding-0.6B,baseline - beta*q_trap,all,0.00,0.30,0.94575,0.7414999999999999,0.01,0.01,0.08,0.946,0.6485,0.08,0.946,0.6485
+Qwen/Qwen3-Embedding-0.6B,target - beta*q_trap,all,0.00,0.30,0.9369999999999999,0.29350000000000004,0.01,0.01,,,,,,
+Qwen/Qwen3-Embedding-4B,baseline - beta*q_trap,all,0.00,0.30,0.94525,0.75175,0.01,0.02,0.00,0.94525,0.75175,0.10,0.9454999999999999,0.65325
+Qwen/Qwen3-Embedding-4B,target - beta*q_trap,all,0.00,0.30,0.9397499999999999,0.3385,0.01,0.01,,,,,,

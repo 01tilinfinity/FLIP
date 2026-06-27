@@ -19,3 +19,4 @@ Current versions:
 | --- | --- | --- |
 | v1 | `v1_base_system.txt` | Baseline target/trap decomposition prompt. |
 | v2 | `v2_recall_preserving_system.txt` | Recall-preserving target/trap prompt with conservative trap precision. |
+| v3 | `v3_oracle_style_trap_system.txt` | Recall-preserving prompt that makes `q_trap` a short oracle-style negative anchor. |

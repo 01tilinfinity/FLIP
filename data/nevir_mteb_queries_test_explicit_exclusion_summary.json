@@ -1,0 +1,10 @@
+{
+  "dataset": "mteb/NevIR",
+  "config": "queries",
+  "split": "test",
+  "available_query_rows": 2766,
+  "requested_rows": 10000,
+  "explicit_exclusion_form_rows": 147,
+  "explicit_exclusion_form_rate": 0.05314533622559653,
+  "regex": "\\b(excluding|exclude|excludes|excluded|without|except|excepting|besides|other than|aside from|apart from|instead of|rather than|with the exception of|not including|excluding any|exclude any)\\b"
+}
