@@ -31,7 +31,7 @@ Beyond explicit negation, queries may ask for answers that include one concept w
 Because the excluded concept still appears in the query text, dense retrievers may assign high similarity to documents about that concept even when the user asks to avoid it.
 We introduce \method, a training-free reranking method for negation-sensitive retrieval.
 \method uses a large language model to extract the target intent and the excluded trap intent, then penalizes documents similar to the trap.
-On ExcluIR \citep{zhang2024excluir}, \method reduces trap retrieval across four embedding models while approximately preserving answer recall under moderate penalty weights.
+On ExcluIR \citep{zhang2024excluir}, \method reduces trap retrieval across four embedding models while approximately preserving answer recall at recall-preserving penalty weights.
 \end{abstract}
 
 \section{Introduction}
@@ -43,7 +43,7 @@ When such documents are used as evidence for generation, retrieving the excluded
 This risk is amplified in generation settings, where negated contexts can make LLM judgments less faithful \citep{seo-etal-2025-impact}.
 
 This setting is difficult for dense retrieval because the excluded concept is both salient and present in the query.
-The retriever may assign high similarity to a document precisely because it matches the term the user asked to avoid.
+The retriever may assign high similarity to a document precisely because it matches the term the user asked to avoid, reflecting the lexical and semantic signals retained in dense representations \citep{ram-etal-2023-token}.
 Negative queries with exclusion constraints therefore require a distinction between inclusion and exclusion semantics that standard retrievers often do not encode reliably \citep{lee2026deotrainingfreedirectembedding}.
 Similar failures have also been observed in joint embedding-based vision-language retrieval, where models struggle to distinguish affirmative and negated conditions \citep{alhamoud2025visionlanguagemodelsunderstandnegation}.
 
@@ -58,17 +58,14 @@ The language model is used only for query rewriting; it does not inspect documen
 
 Our contributions are as follows.
 \begin{itemize}
-    \item We introduce a training-free trap-penalty reranking method for negative queries with exclusion constraints. \method changes only inference-time scores and does not use gold answer/trap labels for reranking, add external knowledge, or modify the corpus.
+    \item We introduce \method, a training-free trap-penalty reranking method that changes only inference-time scores and uses no gold answer/trap labels, external knowledge, or corpus modifications.
     \item We evaluate the method on ExcluIR over the full retrieval corpus across four embedding models \citep{zhang2024excluir}.
     \item We analyze the recall--violation trade-off and identify failure cases where answer documents mention the excluded entity or lie close to the trap document in embedding space.
 \end{itemize}
 
 \section{Related Work}
 
-Our work builds on three strands of prior research.
-The first studies negation and negative constraints as a persistent bottleneck for language understanding and retrieval.
-The second develops embedding-level corrections for negation-aware retrieval.
-The third uses rank fusion to combine retrieval signals, motivating our score-level reranking formulation.
+Our work is related to prior studies on negative constraints in retrieval, embedding-level negation correction, and rank-fusion-based reranking.
 
 \paragraph{Negative constraints in retrieval.}
 Negation has long been a weak point for language understanding systems.
@@ -85,7 +82,7 @@ DEO addresses this by decomposing positive and negative components and optimizin
 
 \paragraph{Rank fusion for reranking.}
 Reciprocal Rank Fusion (RRF) combines ranked lists with reciprocal-rank contributions rather than raw scores, making it useful when different retrieval systems produce incomparable score scales \citep{cormack2009reciprocal}.
-This suggests an anti-RRF variant for exclusion constraints: keep the original-query rank signal but subtract the trap-query contribution, e.g., $1/(k_{\mathrm{rrf}}+r_q(d))-\beta/(k_{\mathrm{rrf}}+r_{\mathrm{trap}}(d))$.
+Because the trap query represents evidence to demote rather than combine, this suggests an anti-RRF variant for exclusion constraints: keep the original-query rank signal but subtract the trap-query contribution, e.g., $1/(k_{\mathrm{rrf}}+r_q(d))-\beta/(k_{\mathrm{rrf}}+r_{\mathrm{trap}}(d))$.
 We also considered this rank-based formulation, but use dense scores in the main method because they provide a smoother penalty signal than rank-only contributions.
 
 \section{FLIP}
@@ -124,15 +121,12 @@ The baseline ranks documents by $s(d,q)$, or by a cleaned rewrite of the origina
     \label{eq:flip}
 \end{equation}
 where $\alpha$, $\gamma$, and $\beta$ control the original-query, target, and trap terms.
-The positive weights $\alpha$ and $\gamma$ select which retrieval signal to preserve: the original query score or the target-query score.
-In our experiments, we do not tune $\alpha$ and $\gamma$ continuously.
-We keep them as a discrete choice so that the positive evidence used for ranking remains fixed, and the effect of the trap penalty can be attributed to a single parameter.
-Tuning $\alpha$, $\gamma$, and $\beta$ jointly would mix recall changes from positive-score reweighting with violation changes from trap demotion.
-Instead, we evaluate two variants, baseline-minus-trap with $(\alpha,\gamma)=(1,0)$ and target-minus-trap with $(\alpha,\gamma)=(0,1)$.
+We treat $(\alpha,\gamma)$ as a discrete choice rather than tuning them continuously: baseline-minus-trap uses $(1,0)$, and target-minus-trap uses $(0,1)$.
+This isolates the effect of the trap penalty from changes caused by reweighting the positive retrieval signal.
 The only tuned penalty weight is $\beta$, which controls how strongly documents similar to the trap query are demoted.
-Table~\ref{tab:main-results} reports the baseline-minus-trap setting that preserves recall while stably reducing violation.
-The appendix reports the full beta grid for both scoring variants, with $\beta=0$ serving as the zero-penalty reference for each variant.
-Because all terms are retriever scores, \method can be applied to sparse or dense retrievers with comparable scoring functions.
+Table~\ref{tab:main-results} reports the baseline-minus-trap setting that preserves recall while reducing violation.
+The appendix reports both scoring variants across beta values, with $\beta=0$ serving as the zero-penalty reference for each variant.
+This formulation requires scores to be comparable across query rewrites; in this paper, we evaluate it with dense retriever scores.
 
 \section{Experimental Setup}
 
@@ -143,7 +137,7 @@ We score against the full ExcluIR corpus of 90,406 documents.
 Gold and trap document indices are used only for evaluation, not for query decomposition, retrieval, or reranking.
 
 \paragraph{Retrievers and Decomposition.}
-We test four embedding models: OpenAI text-embedding-3-small, OpenAI text-embedding-3-large, Qwen3-Embedding-0.6B, and Qwen3-Embedding-4B.
+We test four embedding models: OpenAI text-embedding-3-small, OpenAI text-embedding-3-large, Qwen3-Embedding-0.6B, and Qwen3-Embedding-4B \citep{zhang2025qwen3embeddingadvancingtext}.
 For each query, we generate $q_{\mathrm{target}}$ and $q_{\mathrm{trap}}$ with GPT-4o mini.
 For the main variant, we use the original query as the positive retrieval signal and $q_{\mathrm{trap}}$ only as a penalty signal: $S(d)=s(d,q)-\beta s(d,q_{\mathrm{trap}})$.
 We evaluate $\beta \in [0,1]$ at intervals of 0.01 to characterize the recall--violation trade-off rather than to claim a deployment-ready tuned hyperparameter.
@@ -183,7 +177,7 @@ Qwen3-Embedding-4B & \method & 0.11 & \textbf{0.9296} & \textbf{0.5716} & \textb
 
 Table~\ref{tab:main-results} shows that \method reduces trap retrieval across all four retrievers.
 The baseline retrievers achieve high recall, but they often retrieve the forbidden document as well: violation@5 ranges from 0.728 to 0.886.
-The full beta grid in the appendix shows a clear recall--violation trade-off.
+Across the beta grid, \method shows a clear recall--violation trade-off.
 As $\beta$ increases, trap documents are demoted more strongly, but very large penalties can also demote answer documents that share evidence with the trap intent.
 At $\beta=1.0$, average violation drops to 0.030--0.036 across retrievers, but average recall also falls to 0.779--0.835, well below the baseline range of 0.937--0.942.
 
@@ -191,8 +185,8 @@ Despite this trade-off, there are beta values where recall remains effectively u
 At the representative settings in Table~\ref{tab:main-results}, average recall changes by at most 0.0002 from the baseline, while average violation decreases for every retriever.
 The largest top-$k$ reduction occurs for text-embedding-3-small, where violation@5 decreases from 0.879 to 0.517 while recall@5 changes only from 0.938 to 0.936.
 
-The appendix shows that the size of the violation reduction can vary by dataset, but the beta-dependent trade-off remains.
-The range of recall-preserving beta values also differs by retriever, suggesting that the penalty strength should be selected based on the retriever and dataset.
+The appendix shows that the size of the violation reduction varies across retrievers and scoring variants, but the beta-dependent trade-off remains.
+The range of recall-preserving beta values also differs by retriever, suggesting that the penalty strength should be selected based on the retriever and scoring variant.
 Overall, the results show that a score-level trap penalty can preserve target-document retrieval while moving trap documents out of the top ranks.
 
 \section{Failure Analysis}
@@ -212,7 +206,7 @@ Future systems should combine trap-query penalties with passage- or span-level e
 
 We presented \method, a training-free flipped-query penalty for negative queries with exclusion constraints.
 By extracting a trap intent from the query and subtracting trap similarity, \method reduces forbidden-document retrieval across four dense retrievers while exposing a clear recall--violation trade-off.
-Because it requires no task-specific training, \method can be easily integrated with existing dense retrievers as an inference-time correction.
+Because it requires no task-specific training, \method can be used with existing dense retrievers as an inference-time correction.
 
 \section*{Limitations}
 
@@ -226,6 +220,7 @@ The current linear penalty may over-demote correct documents that contain incide
 
 This work uses public benchmark data and only rewrites queries for retrieval; deployments should monitor over-penalization when excluded entities appear in otherwise relevant evidence.
 
+\clearpage
 \bibliography{custom}
 
 \clearpage
