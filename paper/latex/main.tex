@@ -15,9 +15,9 @@
 \usepackage{graphicx}
 \usepackage{xspace}
 
-\newcommand{\method}{Negation-Contrastive Reranking\xspace}
+\newcommand{\method}{K-FLIP\xspace}
 
-\title{\method for Information Retrieval with Negated Queries}
+\title{K-FLIP: Knowledge-Free Flipped-Intent Penalty for Negation-Sensitive Retrieval}
 
 \author{Anonymous Authors}
 
@@ -25,164 +25,177 @@
 \maketitle
 
 \begin{abstract}
-Negation is a compact linguistic device with large consequences for information retrieval.
-Queries such as ``cake recipes without butter'' specify not only a topical intent, but also an exclusion constraint that can be easily missed by lexical and dense retrievers.
-We propose a simple reranking framework for negation-sensitive retrieval: retrieve once with the original negated query, retrieve again with an LLM-generated contrastive query in which the negated constraint is replaced by its affirmative counterpart, and rerank documents by the difference between the two retrieval scores.
-This paper outlines the task, method, and evaluation protocol for studying whether contrastive score subtraction improves retrieval under negated user intents.
+Users often express information needs with negative constraints.
+Beyond simple negation, queries frequently ask for answers that include one concept while excluding another, or for entities that belong to a category but differ from a closely related instance.
+Such constraints are important for generating the answer the user actually wants, and failing to respect them can be harmful: in security-sensitive settings, highly ranking a document that should have been excluded may leak information into the final response.
+Because the excluded concept still appears in the query text, dense retrievers may assign high similarity to documents about that concept even when the user asks to avoid it.
+We introduce \method, a training-free reranking method for negation-sensitive retrieval.
+\method uses an LLM to decompose an exclusionary query into a target intent and a flipped trap intent, then penalizes documents that are similar to the trap.
+On ExcluIR, \method reduces violation@5 by up to 97\% across four embedding models, revealing a controllable recall--violation trade-off for exclusion-aware retrieval.
 \end{abstract}
 
 \section{Introduction}
 
-Users frequently express information needs through negation, exclusion, and absence.
-For example, a user searching for ``cake recipes without butter'' is not merely interested in cake recipes, but in recipes that avoid a specific ingredient.
-Standard retrieval models may assign high scores to documents that strongly match the topical terms while failing to enforce the negated constraint.
+Retrieval is often treated as a relevance problem, but grounded language models need retrieval to satisfy a stronger condition: the returned evidence must be faithful to the user's full intent.
+This becomes difficult when intent is expressed through negation or exclusion.
+A query such as ``documentaries about the Iraq war, excluding \textit{Gunner Palace}'' asks for documents about the broad topic while ruling out a highly related entity.
+Dense retrievers can easily retrieve the excluded entity because it is semantically close to the desired topic.
+In a retrieval-augmented generation pipeline, such documents can ground an answer in precisely the evidence the user asked to avoid.
 
-Recent benchmarks make this failure mode increasingly visible.
-NevIR shows that many neural retrievers struggle to distinguish minimally different documents whose relevance flips under negation \citep{weller-etal-2024-nevir}, while ExcluIR broadens the problem to realistic exclusionary queries where users specify what they do not want \citep{zhang-etal-2024-excluir}.
-NegConstraint further frames negative constraints as a logical consistency problem and addresses it with a neural-symbolic reranker \citep{xu-etal-2025-negconstraint}.
-Together, these studies demonstrate that negation-sensitive retrieval is not solved by stronger semantic matching alone.
-However, existing solutions largely emphasize new benchmarks, additional negation-specific training data, or specialized model architectures.
-This leaves open a practical question: can an existing retriever be made more sensitive to negated intent at inference time, without retraining or changing its scoring function?
+Recent work shows that negation is a persistent weakness for neural retrieval.
+NevIR tests whether retrievers can distinguish minimally different document pairs whose relevance flips under negation \citep{weller-etal-2024-nevir}.
+ExcluIR extends this issue to realistic exclusionary queries \citep{zhang-etal-2024-excluir}, and NegConstraint studies negative constraints with a neural-symbolic reranker \citep{xu-etal-2025-negconstraint}.
+These approaches highlight the importance of negation-aware retrieval, but they often require specialized data, training, or model changes.
 
-We study a lightweight approach to negation-sensitive reranking.
-Given a negated query, we use a large language model (LLM) to generate a contrastive affirmative query.
-For example, ``cake recipes without butter'' is transformed into ``cake recipes with butter''.
-We then compare the score of each document under the original query and the contrastive query.
-Documents that are relevant to the original query but also strongly match the contrastive query are penalized.
-The key intuition is that the affirmative rewrite approximates the forbidden intent.
-Thus, subtracting its retrieval score turns the retriever's own preference for the opposite condition into a penalty signal.
-Unlike fine-tuning-based approaches, this mechanism is model-agnostic and can be layered over sparse, dense, or neural reranking systems as long as they expose comparable scores.
+We ask whether an existing retriever can be made more faithful to exclusionary intent at inference time.
+We propose \method, a simple knowledge-free reranker.
+Given an exclusionary query, an LLM produces two short rewrites: a target query that preserves what should be retrieved and a trap query that names the flipped or forbidden intent.
+Documents are then rescored by rewarding similarity to the target while subtracting similarity to the trap.
+The contribution is deliberately small and practical: \method is a drop-in score transformation for retrievers that expose comparable similarity scores.
 
-Our intended contributions are:
+Our experiments on ExcluIR show that this simple penalty can greatly reduce constraint violations.
+Across four dense retrievers, top-5 violation rates fall from 0.740--0.883 under the baseline to 0.090--0.115 under the best \method settings, with top-5 recall remaining between 0.884 and 0.914.
+We also analyze failure cases and find that many errors arise when the answer document itself mentions the forbidden entity, suggesting that negation-sensitive retrieval needs document-level evidence localization rather than only query-level rewriting.
+
+\section{K-FLIP}
+
+\begin{figure*}[t]
+    \centering
+    \includegraphics[width=0.96\textwidth]{figures/kflip_pipeline_cropped.pdf}
+    \caption{Overview of \method. An exclusionary query is decomposed into target and trap intents. The final document score combines the original-query and target similarities while penalizing similarity to the trap intent.}
+    \label{fig:kflip-pipeline}
+\end{figure*}
+
+\subsection{Query Decomposition}
+
+Let $q$ be an exclusionary query.
+\method asks an LLM to produce two rewrites:
 \begin{itemize}
-    \item We formulate negated-query retrieval as a contrastive reranking problem.
-    \item We propose a simple score-difference reranker that can be applied on top of existing sparse or dense retrievers.
-    \item We outline an evaluation protocol for measuring retrieval quality on queries containing explicit negation.
+    \item $q_{\mathrm{target}}$: the positive information need, with the exclusion removed but the main topic preserved;
+    \item $q_{\mathrm{trap}}$: the forbidden or flipped intent that should be penalized.
 \end{itemize}
+For example, the query ``location of Friday Harbor Airport without bringing up Dayton International Airport'' is decomposed into target intent ``location of Friday Harbor Airport'' and trap intent ``Dayton International Airport''.
+The LLM is not used to score documents or inspect gold labels; it only produces these two strings.
 
-\section{Task Definition}
+\subsection{Score Transformation}
 
-Let $q^{-}$ denote an original user query containing a negated constraint, such as ``cake recipes without butter''.
-Let $q^{+}$ denote a contrastive query generated by replacing the negated component with an affirmative counterpart, such as ``cake recipes with butter''.
-Given a corpus $\mathcal{D}$, the goal is to rank documents $d \in \mathcal{D}$ such that documents satisfying the intent of $q^{-}$ are ranked above documents that satisfy only the broad topic or the opposite constraint.
-
-\section{Method}
-
-\subsection{Contrastive Query Generation}
-
-We prompt an LLM to identify the negated span in $q^{-}$ and rewrite it as an affirmative counterpart while preserving the rest of the query intent.
-The rewrite should change only the polarity-sensitive component.
-Table~\ref{tab:rewrite-examples} shows examples.
-
-\begin{table}[t]
-\centering
-\small
-\begin{tabular}{ll}
-\toprule
-Original query $q^{-}$ & Contrastive query $q^{+}$ \\
-\midrule
-cake recipes without butter & cake recipes with butter \\
-hotels with no parking fee & hotels with parking fee \\
-non-alcoholic cocktails & alcoholic cocktails \\
-\bottomrule
-\end{tabular}
-\caption{Examples of LLM-generated contrastive queries.}
-\label{tab:rewrite-examples}
-\end{table}
-
-\subsection{Score-Difference Reranking}
-
-We retrieve or score documents with both the original query and the contrastive query.
-Let $s(d, q)$ be the retrieval score assigned to document $d$ for query $q$.
-The final reranking score is:
-
+Let $s(d,q)$ be the retriever similarity score between document $d$ and query $q$.
+The baseline ranks documents by $s(d,q)$, or by a cleaned rewrite of the original query when available.
+\method instead computes
 \begin{equation}
-    s_{\mathrm{final}}(d, q^{-}) =
-    s(d, q^{-}) - \lambda s(d, q^{+}),
-    \label{eq:score-difference}
+    S(d) = \alpha s(d,q) + \gamma s(d,q_{\mathrm{target}})
+           - \beta s(d,q_{\mathrm{trap}}),
+    \label{eq:kflip}
 \end{equation}
-
-where $\lambda$ controls the strength of the contrastive penalty.
-When $\lambda=1$, the model directly subtracts the contrastive score from the original score.
-Documents that match the affirmative counterpart receive a lower final score.
-
-\subsection{Candidate Pooling}
-
-We consider two candidate construction strategies:
-\begin{enumerate}
-    \item Retrieve top-$k$ documents with $q^{-}$ and rerank only those documents.
-    \item Retrieve top-$k$ documents with both $q^{-}$ and $q^{+}$, merge the candidate sets, and rerank the union.
-\end{enumerate}
+where $\alpha$, $\gamma$, and $\beta$ control the original-query, target, and trap terms.
+The simplest variant uses only the original query and trap penalty by setting $\gamma=0$.
+The main variant uses target-minus-trap scoring by setting $\alpha=0$ and tuning $\gamma,\beta$.
+Because all terms are ordinary retriever scores, \method can be applied to any sparse or dense retriever with comparable scores.
 
 \section{Experimental Setup}
 
-\subsection{Datasets}
+\paragraph{Dataset.}
+We evaluate on 3,452 exclusionary queries from ExcluIR \citep{zhang-etal-2024-excluir}.
+Each example contains an exclusionary query, a gold answer document, and a trap document corresponding to the excluded intent.
+We score against the full ExcluIR corpus of 90,406 documents.
+Gold document indices are used only for evaluation.
 
-We will evaluate on retrieval queries containing explicit negation.
-Candidate sources include existing IR benchmarks with manually identified negated queries, synthetically generated negation queries, or domain-specific datasets such as recipes, products, and travel search.
+\paragraph{Retrievers.}
+We test four embedding models: BGE-M3, Qwen3-Embedding-0.6B, Qwen3-Embedding-4B, and OpenAI text-embedding-3-small.
+For each query, we generate $q_{\mathrm{target}}$ and $q_{\mathrm{trap}}$ with GPT-4o mini.
+We evaluate a small parameter grid $\gamma,\beta \in \{0.1,0.25,0.5,0.75,1.0\}$ for target-minus-trap scoring and report the best average recall-minus-violation configuration as a characterization of the attainable recall--violation trade-off.
 
-\subsection{Baselines}
+\paragraph{Metrics.}
+Recall@$k$ measures whether the gold answer document appears in the top $k$.
+Violation@$k$ measures whether the trap document appears in the top $k$.
+Right-rank measures whether the answer document is ranked above the trap document.
+For exclusionary retrieval, higher recall and right-rank are better, while lower violation is better.
 
-We compare against:
-\begin{itemize}
-    \item retrieval with the original query only;
-    \item retrieval with query expansion using the LLM rewrite;
-    \item cross-encoder reranking, when available;
-    \item ablations without score subtraction or without LLM rewriting.
-\end{itemize}
+\section{Results}
 
-\subsection{Metrics}
+\begin{table*}[t]
+\centering
+\small
+\begin{tabular}{llrrrrr}
+\toprule
+Retriever & Method & R@3 & V@3 & R@5 & V@5 & Right \\
+\midrule
+BGE-M3 & Baseline & 0.922 & 0.819 & 0.940 & 0.876 & 0.670 \\
+BGE-M3 & \method & 0.864 & 0.087 & 0.890 & 0.102 & 0.942 \\
+\midrule
+Qwen3-0.6B & Baseline & 0.931 & 0.666 & 0.942 & 0.740 & 0.728 \\
+Qwen3-0.6B & \method & 0.898 & 0.084 & 0.914 & 0.097 & 0.946 \\
+\midrule
+Qwen3-4B & Baseline & 0.934 & 0.692 & 0.942 & 0.746 & 0.740 \\
+Qwen3-4B & \method & 0.893 & 0.077 & 0.910 & 0.090 & 0.948 \\
+\midrule
+text-embedding-3-small & Baseline & 0.931 & 0.835 & 0.946 & 0.883 & 0.666 \\
+text-embedding-3-small & \method & 0.860 & 0.077 & 0.884 & 0.092 & 0.947 \\
+\bottomrule
+\end{tabular}
+\caption{ExcluIR results on 3,452 queries over the full 90,406-document corpus. \method denotes the best target-minus-trap configuration for each retriever. R is recall, V is trap violation rate, and Right is the fraction of examples where the answer ranks above the trap.}
+\label{tab:main-results}
+\end{table*}
 
-We report standard retrieval metrics such as nDCG@$k$, MRR@$k$, Recall@$k$, and Precision@$k$.
-We also report constraint-satisfaction accuracy, measuring whether top-ranked documents obey the negated condition.
+Table~\ref{tab:main-results} shows that \method consistently reduces trap retrieval.
+The baseline retrievers achieve high recall, but they often retrieve the forbidden document as well: violation@5 ranges from 0.740 to 0.883.
+With \method, violation@5 falls below 0.12 for every retriever.
+The strongest setting, Qwen3-Embedding-4B, reduces violation@5 from 0.746 to 0.090 while retaining 0.910 recall@5.
 
-\section{Analysis Plan}
+The trade-off is clearest for BGE-M3 and text-embedding-3-small.
+Both models obtain large violation reductions, but their recall@5 drops by 0.050 and 0.062 respectively.
+This is still useful for grounded generation settings where constraint violations are costly, but it shows that a single linear penalty cannot separate all answers from all traps.
 
-We analyze when score subtraction helps or hurts by grouping queries according to negation type, domain, rewrite quality, and retriever family.
-We also inspect failure cases where the LLM rewrite changes the topic, where the retriever assigns poorly calibrated scores across queries, or where the corpus does not explicitly state the negated property.
+\section{Failure Analysis}
+
+We manually inspected failure cases for the target-minus-trap variant.
+Two patterns dominate.
+First, many gold answer documents mention the excluded entity.
+For example, an answer page about a film may list an actor that the query asks to exclude.
+Because \method penalizes document-level similarity to the trap query, it can demote otherwise correct documents that contain incidental trap evidence.
+Second, many answer and trap documents are near-neighbors in embedding space: they concern sibling entities, adaptations, cast members, or closely related institutions.
+In these cases, the trap penalty often lowers both documents together.
+
+These failures suggest that \method is best viewed as a lightweight retrieval-time guardrail, not a complete solution to negation.
+Future systems should combine query-level flipped-intent penalties with passage- or span-level evidence checks so that an incidental mention of the forbidden entity does not automatically invalidate an otherwise useful document.
 
 \section{Related Work}
 
-Recent work shows that negation remains a brittle phenomenon for neural information retrieval.
-\citet{weller-etal-2024-nevir} introduce NevIR, a targeted benchmark in which retrieval models must distinguish between document pairs that differ primarily in negation.
-Their results show a clear architectural gap: cross-encoders handle negation better than late-interaction, bi-encoder, and sparse neural models, but even strong models remain far from human performance.
-This motivates treating negation not as a minor lexical variant, but as a semantic constraint that can reverse relevance judgments.
+\paragraph{Negation-sensitive retrieval.}
+NevIR demonstrates that neural retrievers often fail on paired examples where negation reverses relevance \citep{weller-etal-2024-nevir}.
+ExcluIR collects realistic exclusionary queries and shows that retrievers struggle to satisfy what users do not want \citep{zhang-etal-2024-excluir}.
+NegConstraint frames negative constraints as a logical consistency problem and uses neural-symbolic reranking \citep{xu-etal-2025-negconstraint}.
+\method differs by avoiding training and symbolic parsing: it uses an LLM only to expose a target and trap query, then applies a simple score transformation.
 
-Exclusionary retrieval extends this concern from controlled contrastive pairs to realistic user queries.
-\citet{zhang-etal-2024-excluir} propose ExcluIR, a benchmark and training resource for queries that specify what users do not want.
-They find that existing retrievers struggle with exclusionary intent, while training on exclusionary examples improves performance without closing the gap to human judgments.
-Similarly, \citet{xu-etal-2025-negconstraint} study negative-constraint queries through NegConstraint and propose NS-IR, a neural-symbolic method that uses first-order logic, logic alignment, and connective constraints to improve consistency between queries and documents.
-These datasets and methods establish that explicit negative constraints are a distinct retrieval challenge, not merely a special case of ordinary topical matching.
-
-Our work is closest in spirit to this line of negation-sensitive and exclusionary IR, but differs in its intervention point.
-Rather than constructing a new retriever or fine-tuning on negation-specific training data, we use an LLM to generate an affirmative counterpart to the original negated query and apply score-difference reranking at inference time.
-This connects negation-aware retrieval with query rewriting and contrastive reranking: the contrastive query functions as an estimate of the opposite intent, allowing documents that match the forbidden condition to be penalized while preserving compatibility with existing sparse, dense, or neural rerankers.
+\paragraph{Grounded generation.}
+Although our experiments are retrieval-only, the motivation is grounded language generation.
+If the evidence set contains documents that violate an exclusionary query, the generator may produce an answer grounded in disallowed evidence.
+Negation-sensitive retrieval is therefore a useful front-end guardrail for grounding and faithfulness.
 
 \section{Conclusion}
 
-We proposed a contrastive reranking framework for information retrieval with negated queries.
-By comparing retrieval scores from an original negated query and an LLM-generated affirmative counterpart, the method aims to penalize documents that satisfy the opposite constraint.
-Future work will evaluate the approach across retrievers, domains, and negation types.
+We presented \method, a knowledge-free flipped-intent penalty for exclusionary retrieval.
+By decomposing a query into target and trap intents and subtracting trap similarity, \method substantially reduces retrieval of forbidden documents across four dense retrievers.
+The method is simple and training-free, making it attractive for grounded language systems that need fast retrieval-time constraint handling.
+Its main limitation is document-level over-penalization when correct documents mention excluded entities, motivating future work on localized evidence checks.
 
 \section*{Limitations}
 
-The method depends on the quality of LLM-generated rewrites and assumes that scores across the original and contrastive queries are comparable.
-It may be less effective when documents imply constraints indirectly or when the negated attribute is absent from the document text.
+\method depends on the quality of LLM-generated decompositions and assumes that retriever scores are comparable across target and trap queries.
+The reported \method settings are selected from a small parameter search on the evaluated sample to characterize the trade-off; future work should tune hyperparameters on a separate development set.
+Our evaluation focuses on ExcluIR and dense retrieval.
+Although exclusion is common in natural queries, there are few high-quality benchmarks built specifically for exclusion-aware retrieval, and even fewer provide reliable document-level links for both target and forbidden evidence.
+This makes broad benchmark coverage difficult.
+At the same time, this scarcity motivates inference-time methods such as \method: because it does not require task-specific training data, it can be applied efficiently to natural exclusion queries with existing retrievers.
+Broader tests should include sparse retrieval, cross-encoder reranking, and downstream RAG answer quality.
+The current linear penalty may over-demote correct documents that contain incidental mentions of excluded entities.
 
 \section*{Ethics Statement}
 
-The proposed method is intended to improve faithful retrieval for user-specified constraints.
-Potential risks include over-penalizing relevant documents due to erroneous rewrites or retrieval score miscalibration.
+This work aims to improve user control over retrieved evidence.
+However, an overly aggressive trap penalty can suppress relevant documents, especially when excluded entities are mentioned for context.
+Systems using this method should expose uncertainty and avoid treating absence from retrieved evidence as proof that excluded content is absent from the corpus.
 
 \bibliography{custom}
-
-\appendix
-
-\section{Prompt Template}
-
-\begin{quote}
-\small
-Given a user query containing negation, rewrite only the negated condition into its affirmative counterpart while preserving the rest of the query. Return only the rewritten query.
-\end{quote}
 
 \end{document}

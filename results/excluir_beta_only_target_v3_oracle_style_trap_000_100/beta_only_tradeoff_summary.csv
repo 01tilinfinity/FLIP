@@ -1,4 +1,0 @@
-embedding_model,condition,candidate_top_n,strict_tradeoff_start_beta,avg_tradeoff_start_beta,first_avg_violation_lower_beta,best_strict_beta,best_strict_avg_recall,best_strict_avg_violation,best_avg_kept_beta,best_avg_kept_avg_recall,best_avg_kept_avg_violation
-text-embedding-3-small,target - beta*q_trap,all,0.01,0.01,0.01,,,,,,
-Qwen/Qwen3-Embedding-0.6B,target - beta*q_trap,all,0.01,0.01,0.01,,,,,,
-Qwen/Qwen3-Embedding-4B,target - beta*q_trap,all,0.01,0.01,0.01,,,,,,

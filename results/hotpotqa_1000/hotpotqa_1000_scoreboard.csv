@@ -1,5 +1,0 @@
-dataset,config,split,sample_size,retriever,method,samples,recall@3,violation_rate@3,mean_answer_rank,mean_trap_rank
-hotpotqa/hotpot_qa,distractor,train,1000,bm25,baseline,1000,0.997,0.932,1.674,2.404
-hotpotqa/hotpot_qa,distractor,train,1000,bm25,kflip,1000,0.425,0.0,234.883,1314.307
-hotpotqa/hotpot_qa,distractor,train,1000,dense,baseline,1000,0.967,0.462,2.077,71.746
-hotpotqa/hotpot_qa,distractor,train,1000,dense,kflip,1000,0.323,0.0,178.251,1619.364

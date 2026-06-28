@@ -11,12 +11,26 @@ __pycache__/
 .vscode/
 hf_cache/
 logs/
+unused/
 data/excluir_raw/
 data/excluir_cache/
+data/**/cache/
 outputs/
 results/**/score_anti_rrf_details.csv
 results/**/improved_anti_rrf_details.csv
 results/score_matrices/
+*.npy
+*.npz
+*.tgz
+*.tar
+*.tar.gz
+*.zip
+*.part.*
+*.pt
+*.bin
+*.safetensors
+kflip_pipeline.pptx
+kflip_pipeline.pdf
 
 # LaTeX build artifacts
 paper/latex/*.aux

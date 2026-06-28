@@ -1,5 +1,0 @@
-retriever,experiment,method,alpha,beta,candidate_top_n,recall@3,violation_rate@3,recall@5,violation_rate@5,recall@7,violation_rate@7,recall@9,violation_rate@9,right_rank,avg_recall_minus_violation
-bge-m3,full,score_anti_rrf_call_a0.5_b1,0.5,1.0,all,0.827,0.008,0.855,0.011,0.868,0.015,0.88,0.019,0.988,0.84425
-bge-m3,no_target,score_anti_rrf_no_target_c20_a0.75_b1,0.75,1.0,20,0.861,0.003,0.885,0.005,0.907,0.013,0.926,0.031,0.952,0.88175
-inf-retriever-v1,full,score_anti_rrf_call_a0.5_b1,0.5,1.0,all,0.941,0.058,0.956,0.079,0.964,0.09,0.97,0.108,0.987,0.874
-inf-retriever-v1,no_target,score_anti_rrf_no_target_c20_a0.25_b0.3,0.25,0.3,20,0.903,0.002,0.924,0.009,0.941,0.026,0.954,0.049,0.964,0.9089999999999999

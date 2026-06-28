@@ -1,0 +1,1877 @@
+[
+  {
+    "config": "MSMARCO",
+    "qid": 10,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "MSMARCO",
+    "qid": 37,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "MSMARCO",
+    "qid": 42,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "MSMARCO",
+    "qid": 64,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "MSMARCO",
+    "qid": 90,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "MSMARCO",
+    "qid": 93,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "MSMARCO",
+    "qid": 131,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "MSMARCO",
+    "qid": 139,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "MSMARCO",
+    "qid": 144,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "MSMARCO",
+    "qid": 154,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "MSMARCO",
+    "qid": 169,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "MSMARCO",
+    "qid": 179,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "MSMARCO",
+    "qid": 187,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "MSMARCO",
+    "qid": 205,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "MSMARCO",
+    "qid": 217,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "MSMARCO",
+    "qid": 220,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "MSMARCO",
+    "qid": 230,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "MSMARCO",
+    "qid": 233,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "MSMARCO",
+    "qid": 236,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "MSMARCO",
+    "qid": 245,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "MSMARCO",
+    "qid": 247,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "MSMARCO",
+    "qid": 256,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "MSMARCO",
+    "qid": 258,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "MSMARCO",
+    "qid": 278,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "MSMARCO",
+    "qid": 280,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "MSMARCO",
+    "qid": 283,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "MSMARCO",
+    "qid": 286,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "MSMARCO",
+    "qid": 289,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "MSMARCO",
+    "qid": 292,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "MSMARCO",
+    "qid": 298,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "MSMARCO",
+    "qid": 300,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "MSMARCO",
+    "qid": 314,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "MSMARCO",
+    "qid": 318,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "MSMARCO",
+    "qid": 344,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "MSMARCO",
+    "qid": 358,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "MSMARCO",
+    "qid": 363,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "MSMARCO",
+    "qid": 366,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "MSMARCO",
+    "qid": 386,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "MSMARCO",
+    "qid": 389,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "MSMARCO",
+    "qid": 401,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "MSMARCO",
+    "qid": 406,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "MSMARCO",
+    "qid": 408,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "MSMARCO",
+    "qid": 416,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "MSMARCO",
+    "qid": 420,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "MSMARCO",
+    "qid": 426,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "MSMARCO",
+    "qid": 432,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "MSMARCO",
+    "qid": 441,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "MSMARCO",
+    "qid": 443,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "MSMARCO",
+    "qid": 447,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "MSMARCO",
+    "qid": 450,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "MSMARCO",
+    "qid": 458,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "MSMARCO",
+    "qid": 463,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "MSMARCO",
+    "qid": 469,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "MSMARCO",
+    "qid": 474,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "MSMARCO",
+    "qid": 479,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "MSMARCO",
+    "qid": 484,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "MSMARCO",
+    "qid": 492,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "MSMARCO",
+    "qid": 495,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "MSMARCO",
+    "qid": 501,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "MSMARCO",
+    "qid": 506,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "MSMARCO",
+    "qid": 513,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "MSMARCO",
+    "qid": 516,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "MSMARCO",
+    "qid": 523,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "MSMARCO",
+    "qid": 531,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "MSMARCO",
+    "qid": 534,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "MSMARCO",
+    "qid": 537,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "MSMARCO",
+    "qid": 542,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "MSMARCO",
+    "qid": 557,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "MSMARCO",
+    "qid": 559,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "MSMARCO",
+    "qid": 562,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "MSMARCO",
+    "qid": 568,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "MSMARCO",
+    "qid": 571,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "MSMARCO",
+    "qid": 583,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "MSMARCO",
+    "qid": 588,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "MSMARCO",
+    "qid": 591,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "MSMARCO",
+    "qid": 599,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "MSMARCO",
+    "qid": 609,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "MSMARCO",
+    "qid": 614,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "MSMARCO",
+    "qid": 619,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "MSMARCO",
+    "qid": 622,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "MSMARCO",
+    "qid": 625,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "MSMARCO",
+    "qid": 630,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "MSMARCO",
+    "qid": 639,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "MSMARCO",
+    "qid": 654,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "MSMARCO",
+    "qid": 663,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "MSMARCO",
+    "qid": 677,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "MSMARCO",
+    "qid": 683,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "MSMARCO",
+    "qid": 686,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "MSMARCO",
+    "qid": 689,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "MSMARCO",
+    "qid": 702,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "MSMARCO",
+    "qid": 707,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "MSMARCO",
+    "qid": 711,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "MSMARCO",
+    "qid": 716,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "MSMARCO",
+    "qid": 720,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "MSMARCO",
+    "qid": 722,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "MSMARCO",
+    "qid": 741,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "MSMARCO",
+    "qid": 743,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "MSMARCO",
+    "qid": 746,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "MSMARCO",
+    "qid": 756,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "MSMARCO",
+    "qid": 760,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "MSMARCO",
+    "qid": 762,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "MSMARCO",
+    "qid": 780,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "MSMARCO",
+    "qid": 808,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "MSMARCO",
+    "qid": 813,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "MSMARCO",
+    "qid": 832,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "MSMARCO",
+    "qid": 844,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "MSMARCO",
+    "qid": 852,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "MSMARCO",
+    "qid": 855,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "MSMARCO",
+    "qid": 863,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "MSMARCO",
+    "qid": 865,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "MSMARCO",
+    "qid": 870,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "MSMARCO",
+    "qid": 879,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "MSMARCO",
+    "qid": 882,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "MSMARCO",
+    "qid": 885,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "MSMARCO",
+    "qid": 890,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "MSMARCO",
+    "qid": 954,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "MSMARCO",
+    "qid": 958,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "MSMARCO",
+    "qid": 972,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "MSMARCO",
+    "qid": 978,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "MSMARCO",
+    "qid": 989,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "MSMARCO",
+    "qid": 996,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "MSMARCO",
+    "qid": 1019,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "MSMARCO",
+    "qid": 1042,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "MSMARCO",
+    "qid": 1047,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "MSMARCO",
+    "qid": 1064,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "MSMARCO",
+    "qid": 1074,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "MSMARCO",
+    "qid": 1077,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "MSMARCO",
+    "qid": 1079,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "MSMARCO",
+    "qid": 1081,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "MSMARCO",
+    "qid": 1099,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "MSMARCO",
+    "qid": 1138,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "MSMARCO",
+    "qid": 1147,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "MSMARCO",
+    "qid": 1149,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "NaturalQuestions",
+    "qid": 7,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "NaturalQuestions",
+    "qid": 10,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "NaturalQuestions",
+    "qid": 14,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "NaturalQuestions",
+    "qid": 19,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "NaturalQuestions",
+    "qid": 22,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "NaturalQuestions",
+    "qid": 25,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "NaturalQuestions",
+    "qid": 35,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "NaturalQuestions",
+    "qid": 38,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "NaturalQuestions",
+    "qid": 41,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "NaturalQuestions",
+    "qid": 44,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "NaturalQuestions",
+    "qid": 47,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "NaturalQuestions",
+    "qid": 53,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "NaturalQuestions",
+    "qid": 56,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "NaturalQuestions",
+    "qid": 59,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "NaturalQuestions",
+    "qid": 68,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "NaturalQuestions",
+    "qid": 75,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "NaturalQuestions",
+    "qid": 78,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "NaturalQuestions",
+    "qid": 89,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "NaturalQuestions",
+    "qid": 107,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "NaturalQuestions",
+    "qid": 114,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "NaturalQuestions",
+    "qid": 121,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "NaturalQuestions",
+    "qid": 125,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "NaturalQuestions",
+    "qid": 127,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "NaturalQuestions",
+    "qid": 133,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "NaturalQuestions",
+    "qid": 145,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "NaturalQuestions",
+    "qid": 157,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "NaturalQuestions",
+    "qid": 160,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "NaturalQuestions",
+    "qid": 163,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "NaturalQuestions",
+    "qid": 174,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "NaturalQuestions",
+    "qid": 177,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "NaturalQuestions",
+    "qid": 182,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "NaturalQuestions",
+    "qid": 189,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "NaturalQuestions",
+    "qid": 193,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "NaturalQuestions",
+    "qid": 207,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "NaturalQuestions",
+    "qid": 210,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "NaturalQuestions",
+    "qid": 216,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "NaturalQuestions",
+    "qid": 226,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "NaturalQuestions",
+    "qid": 229,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "NaturalQuestions",
+    "qid": 233,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "NaturalQuestions",
+    "qid": 236,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "NaturalQuestions",
+    "qid": 239,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "NaturalQuestions",
+    "qid": 242,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "NaturalQuestions",
+    "qid": 247,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "NaturalQuestions",
+    "qid": 252,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "NaturalQuestions",
+    "qid": 255,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "NaturalQuestions",
+    "qid": 268,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "NaturalQuestions",
+    "qid": 271,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "NaturalQuestions",
+    "qid": 274,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "NaturalQuestions",
+    "qid": 282,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "NaturalQuestions",
+    "qid": 287,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "NaturalQuestions",
+    "qid": 290,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "NaturalQuestions",
+    "qid": 295,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "NaturalQuestions",
+    "qid": 298,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "NaturalQuestions",
+    "qid": 301,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "NaturalQuestions",
+    "qid": 306,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "NaturalQuestions",
+    "qid": 312,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "NaturalQuestions",
+    "qid": 315,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "NaturalQuestions",
+    "qid": 318,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "NaturalQuestions",
+    "qid": 321,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "NaturalQuestions",
+    "qid": 323,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "NaturalQuestions",
+    "qid": 326,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "NaturalQuestions",
+    "qid": 328,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "NaturalQuestions",
+    "qid": 330,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "NaturalQuestions",
+    "qid": 347,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "NaturalQuestions",
+    "qid": 350,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "NaturalQuestions",
+    "qid": 353,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "NaturalQuestions",
+    "qid": 356,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "NaturalQuestions",
+    "qid": 358,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "NaturalQuestions",
+    "qid": 364,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "NaturalQuestions",
+    "qid": 366,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "NaturalQuestions",
+    "qid": 370,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "NaturalQuestions",
+    "qid": 376,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "NaturalQuestions",
+    "qid": 379,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "NaturalQuestions",
+    "qid": 385,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "NaturalQuestions",
+    "qid": 388,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "NaturalQuestions",
+    "qid": 391,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "NaturalQuestions",
+    "qid": 400,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "NaturalQuestions",
+    "qid": 403,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "NaturalQuestions",
+    "qid": 411,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "NaturalQuestions",
+    "qid": 427,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "NaturalQuestions",
+    "qid": 435,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "NaturalQuestions",
+    "qid": 441,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "NaturalQuestions",
+    "qid": 449,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "NaturalQuestions",
+    "qid": 454,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "NaturalQuestions",
+    "qid": 459,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "NaturalQuestions",
+    "qid": 466,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "NaturalQuestions",
+    "qid": 469,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "NaturalQuestions",
+    "qid": 471,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "NaturalQuestions",
+    "qid": 475,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "NaturalQuestions",
+    "qid": 478,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "NaturalQuestions",
+    "qid": 484,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "NaturalQuestions",
+    "qid": 490,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "NaturalQuestions",
+    "qid": 493,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "NaturalQuestions",
+    "qid": 499,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "NaturalQuestions",
+    "qid": 506,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "NaturalQuestions",
+    "qid": 510,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "NaturalQuestions",
+    "qid": 513,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "NaturalQuestions",
+    "qid": 516,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "NaturalQuestions",
+    "qid": 520,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "NaturalQuestions",
+    "qid": 527,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "NaturalQuestions",
+    "qid": 531,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "NaturalQuestions",
+    "qid": 534,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "NaturalQuestions",
+    "qid": 539,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "NaturalQuestions",
+    "qid": 543,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "NaturalQuestions",
+    "qid": 551,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "NaturalQuestions",
+    "qid": 558,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "NaturalQuestions",
+    "qid": 561,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "NaturalQuestions",
+    "qid": 569,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "NaturalQuestions",
+    "qid": 574,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "NaturalQuestions",
+    "qid": 581,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "NaturalQuestions",
+    "qid": 591,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "NaturalQuestions",
+    "qid": 598,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "NaturalQuestions",
+    "qid": 604,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "NaturalQuestions",
+    "qid": 607,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "NaturalQuestions",
+    "qid": 612,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "NaturalQuestions",
+    "qid": 615,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "NaturalQuestions",
+    "qid": 620,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "NaturalQuestions",
+    "qid": 623,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "NaturalQuestions",
+    "qid": 626,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "NaturalQuestions",
+    "qid": 635,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "NaturalQuestions",
+    "qid": 637,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "NaturalQuestions",
+    "qid": 644,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "NaturalQuestions",
+    "qid": 653,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "NaturalQuestions",
+    "qid": 658,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "NaturalQuestions",
+    "qid": 661,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "NaturalQuestions",
+    "qid": 664,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "NaturalQuestions",
+    "qid": 667,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "NaturalQuestions",
+    "qid": 670,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "NaturalQuestions",
+    "qid": 682,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "NaturalQuestions",
+    "qid": 689,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "NaturalQuestions",
+    "qid": 692,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "NaturalQuestions",
+    "qid": 697,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "NaturalQuestions",
+    "qid": 703,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "NaturalQuestions",
+    "qid": 713,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "NaturalQuestions",
+    "qid": 723,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "NaturalQuestions",
+    "qid": 733,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "NaturalQuestions",
+    "qid": 736,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "NaturalQuestions",
+    "qid": 740,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "NaturalQuestions",
+    "qid": 742,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "NaturalQuestions",
+    "qid": 749,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "NaturalQuestions",
+    "qid": 752,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "NaturalQuestions",
+    "qid": 755,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "NaturalQuestions",
+    "qid": 761,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "NaturalQuestions",
+    "qid": 773,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "NaturalQuestions",
+    "qid": 776,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "NaturalQuestions",
+    "qid": 779,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "NaturalQuestions",
+    "qid": 781,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "NaturalQuestions",
+    "qid": 784,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "NaturalQuestions",
+    "qid": 787,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "NaturalQuestions",
+    "qid": 806,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "NaturalQuestions",
+    "qid": 809,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "NaturalQuestions",
+    "qid": 812,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "NaturalQuestions",
+    "qid": 822,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "NaturalQuestions",
+    "qid": 830,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "NaturalQuestions",
+    "qid": 832,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "NaturalQuestions",
+    "qid": 837,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "NaturalQuestions",
+    "qid": 840,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "NaturalQuestions",
+    "qid": 843,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "NaturalQuestions",
+    "qid": 845,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "NaturalQuestions",
+    "qid": 848,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "NaturalQuestions",
+    "qid": 851,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "NaturalQuestions",
+    "qid": 854,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "NaturalQuestions",
+    "qid": 864,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "NaturalQuestions",
+    "qid": 867,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "NaturalQuestions",
+    "qid": 878,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "NaturalQuestions",
+    "qid": 886,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "NaturalQuestions",
+    "qid": 892,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "NaturalQuestions",
+    "qid": 898,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "NaturalQuestions",
+    "qid": 912,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "NaturalQuestions",
+    "qid": 918,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "NaturalQuestions",
+    "qid": 923,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "NaturalQuestions",
+    "qid": 930,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "NaturalQuestions",
+    "qid": 935,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "NaturalQuestions",
+    "qid": 938,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "NaturalQuestions",
+    "qid": 941,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "NaturalQuestions",
+    "qid": 946,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "NaturalQuestions",
+    "qid": 949,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "NaturalQuestions",
+    "qid": 952,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "NaturalQuestions",
+    "qid": 955,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "NaturalQuestions",
+    "qid": 959,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "NaturalQuestions",
+    "qid": 962,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "NaturalQuestions",
+    "qid": 965,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "NaturalQuestions",
+    "qid": 973,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "NaturalQuestions",
+    "qid": 976,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "NaturalQuestions",
+    "qid": 978,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "NaturalQuestions",
+    "qid": 983,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "NaturalQuestions",
+    "qid": 986,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "NaturalQuestions",
+    "qid": 992,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "NaturalQuestions",
+    "qid": 995,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "NaturalQuestions",
+    "qid": 998,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "NaturalQuestions",
+    "qid": 1001,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "NaturalQuestions",
+    "qid": 1004,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "NaturalQuestions",
+    "qid": 1011,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "NaturalQuestions",
+    "qid": 1022,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "NaturalQuestions",
+    "qid": 1028,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "NaturalQuestions",
+    "qid": 1031,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "NaturalQuestions",
+    "qid": 1036,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "NaturalQuestions",
+    "qid": 1039,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "NaturalQuestions",
+    "qid": 1042,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "NaturalQuestions",
+    "qid": 1045,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "NaturalQuestions",
+    "qid": 1049,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "NaturalQuestions",
+    "qid": 1052,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "NaturalQuestions",
+    "qid": 1057,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "NaturalQuestions",
+    "qid": 1060,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "NaturalQuestions",
+    "qid": 1063,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "NaturalQuestions",
+    "qid": 1066,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "NaturalQuestions",
+    "qid": 1069,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "NaturalQuestions",
+    "qid": 1075,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "NaturalQuestions",
+    "qid": 1078,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "NaturalQuestions",
+    "qid": 1080,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "NaturalQuestions",
+    "qid": 1083,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "NaturalQuestions",
+    "qid": 1095,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "NaturalQuestions",
+    "qid": 1098,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "NaturalQuestions",
+    "qid": 1103,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "NaturalQuestions",
+    "qid": 1106,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "NaturalQuestions",
+    "qid": 1109,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "NaturalQuestions",
+    "qid": 1112,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "NaturalQuestions",
+    "qid": 1115,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "NaturalQuestions",
+    "qid": 1120,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "NaturalQuestions",
+    "qid": 1123,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "NaturalQuestions",
+    "qid": 1134,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "NaturalQuestions",
+    "qid": 1139,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "NaturalQuestions",
+    "qid": 1143,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "NaturalQuestions",
+    "qid": 1148,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "NaturalQuestions",
+    "qid": 1151,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "NaturalQuestions",
+    "qid": 1156,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "NaturalQuestions",
+    "qid": 1159,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "NaturalQuestions",
+    "qid": 1162,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "NaturalQuestions",
+    "qid": 1164,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "NaturalQuestions",
+    "qid": 1172,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "NaturalQuestions",
+    "qid": 1182,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "NaturalQuestions",
+    "qid": 1187,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "NaturalQuestions",
+    "qid": 1190,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "NaturalQuestions",
+    "qid": 1196,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "NaturalQuestions",
+    "qid": 1200,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "NaturalQuestions",
+    "qid": 1207,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "NaturalQuestions",
+    "qid": 1219,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "NaturalQuestions",
+    "qid": 1222,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "NaturalQuestions",
+    "qid": 1231,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "NaturalQuestions",
+    "qid": 1237,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "NaturalQuestions",
+    "qid": 1240,
+    "reason": "missing_positive_or_negative_passage_id"
+  },
+  {
+    "config": "NaturalQuestions",
+    "qid": 1253,
+    "reason": "missing_positive_or_negative_passage_id"
+  }
+]

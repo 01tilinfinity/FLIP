@@ -13,10 +13,13 @@ Policy: keep every prompt version as an immutable experiment artifact.
   `scripts/generate_excluir_rewrites.py` will refuse to append unless
   `--allow-mixed-prompt-output` is passed.
 
-Current versions:
+Active version:
 
 | Version | File | Notes |
 | --- | --- | --- |
-| v1 | `v1_base_system.txt` | Baseline target/trap decomposition prompt. |
-| v2 | `v2_recall_preserving_system.txt` | Recall-preserving target/trap prompt with conservative trap precision. |
 | v3 | `v3_oracle_style_trap_system.txt` | Recall-preserving prompt that makes `q_trap` a short oracle-style negative anchor. |
+
+Archived versions:
+
+- `unused/prompts/excluir_rewriter_gpt4o_mini/v1_base_system.txt`
+- `unused/prompts/excluir_rewriter_gpt4o_mini/v2_recall_preserving_system.txt`

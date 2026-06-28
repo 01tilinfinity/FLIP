@@ -19,6 +19,11 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--seed", type=int, default=42)
     parser.add_argument("--output-dir", default="data")
     parser.add_argument(
+        "--output-stem",
+        default=None,
+        help="Optional explicit output filename stem. Defaults to excluir_manual_<N>_seed<seed>.",
+    )
+    parser.add_argument(
         "--preserve-order",
         action="store_true",
         help="Use the first N benchmark rows instead of a deterministic shuffle.",
@@ -92,11 +97,14 @@ def main() -> None:
             }
         )
 
-    stem = f"excluir_manual_1000_seed{args.seed}"
-    if args.sample_size != 1000:
-        stem = f"excluir_manual_{args.sample_size}_seed{args.seed}"
-    if args.preserve_order:
-        stem += "_ordered"
+    if args.output_stem:
+        stem = args.output_stem
+    else:
+        stem = f"excluir_manual_1000_seed{args.seed}"
+        if args.sample_size != 1000:
+            stem = f"excluir_manual_{args.sample_size}_seed{args.seed}"
+        if args.preserve_order:
+            stem += "_ordered"
 
     csv_path = output_dir / f"{stem}.csv"
     jsonl_path = output_dir / f"{stem}.jsonl"

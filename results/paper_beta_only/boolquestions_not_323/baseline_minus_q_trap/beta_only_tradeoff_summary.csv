@@ -1,0 +1,5 @@
+embedding_model,condition,candidate_top_n,strict_tradeoff_start_beta,avg_tradeoff_start_beta,first_avg_violation_lower_beta,best_strict_beta,best_strict_avg_recall,best_strict_avg_violation,best_avg_kept_beta,best_avg_kept_avg_recall,best_avg_kept_avg_violation
+text-embedding-3-small,baseline - beta*q_trap,all,0.09,0.13,0.01,0.05,0.9744582043343653,0.9883900928792569,0.12,0.9729102167182663,0.9845201238390092
+text-embedding-3-large,baseline - beta*q_trap,all,0.02,0.02,0.05,0.27,0.9760061919504643,0.9674922600619196,0.29,0.9736842105263157,0.9651702786377709
+Qwen/Qwen3-Embedding-0.6B,baseline - beta*q_trap,all,0.01,0.01,0.04,0.00,0.9752321981424148,0.9961300309597523,0.00,0.9752321981424148,0.9961300309597523
+Qwen/Qwen3-Embedding-4B,baseline - beta*q_trap,all,0.08,0.08,0.01,0.07,0.9713622291021671,0.9814241486068112,0.07,0.9713622291021671,0.9814241486068112
