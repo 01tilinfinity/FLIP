@@ -70,36 +70,10 @@ python scripts/run_kflip_experiment.py \
   --output-dir outputs/openai_full_v3_top10
 ```
 
-Score-level Anti-RRF sweeps normalize baseline/target/trap scores per query and
-rerank with `alpha * baseline + target - beta * trap`:
-
-```bash
-python scripts/sweep_score_anti_rrf.py \
-  --decompositions-jsonl outputs/openai_full_v3/query_decompositions.jsonl \
-  --candidate-top-ns 5,10,20,all \
-  --alphas 0,0.25,0.5,0.75,1,1.5,2 \
-  --betas 0.1,0.2,0.3,0.5,0.75,1 \
-  --output-dir results/score_anti_rrf
-```
-
-For larger samples, use the summary-only fast sweep:
-
-```bash
-python scripts/fast_score_anti_rrf_sweep.py \
-  --sample-csv data/hotpotqa_distractor_train_1000_seed42.csv \
-  --decompositions-jsonl outputs/hotpotqa_1000_bm25_heuristic/query_decompositions.jsonl \
-  --retriever both \
-  --output-dir results/hotpotqa_1000_score_anti_rrf
-```
-
-Softer variants add hinge penalties and confidence gates:
-
-```bash
-python scripts/sweep_improved_anti_rrf.py \
-  --decompositions-jsonl outputs/openai_full_v3/query_decompositions.jsonl \
-  --candidate-top-ns 5,10,20,all \
-  --output-dir results/improved_anti_rrf
-```
+Score-level Anti-RRF runs normalize baseline/target/trap scores per query and
+rerank with `alpha * baseline + target - beta * trap`.
+Older NevIR and HotpotQA utilities are kept under `scripts/` for reproducing
+archived runs.
 
 ## ExcluIR direct rewrite-to-score experiments
 
@@ -146,7 +120,7 @@ DECOMPOSITIONS_JSONL=outputs/excluir_rewriter_gpt4o_mini_v2_short_trap/decomposi
 scripts/run_excluir_rewriter_direct_score_experiment.sh all
 ```
 
-Run the latest direct scoring sweep:
+Run the latest direct scoring evaluation:
 
 ```bash
 scripts/run_excluir_rewriter_direct_score_experiment.sh all
@@ -196,7 +170,7 @@ Outputs:
 - `outputs/scoreboard.csv`
 - `outputs/scoreboard.json`
 
-If OpenAI credentials are not available yet, run a structural smoke test with
+If OpenAI credentials are not available yet, run a quick structural check with
 the NevIR paired-query fallback:
 
 ```bash
