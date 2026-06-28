@@ -16,10 +16,9 @@
 \usepackage{rotating}
 \usepackage{xspace}
 
-\newcommand{\method}{K-FLIP\xspace}
+\newcommand{\method}{FLIP\xspace}
 
-\title{K-FLIP: Knowledge-Free Flipped-Intent Penalty for\\
-Negation-Sensitive Retrieval}
+\title{FLIP: A Flipped-Query Penalty for Negative-Constraint Retrieval}
 
 \author{Anonymous Authors}
 
@@ -31,8 +30,8 @@ Users often express information needs with negative constraints.
 Beyond explicit negation, queries may ask for answers that include one concept while excluding another, or for entities that belong to a category but differ from a closely related instance.
 Because the excluded concept still appears in the query text, dense retrievers may assign high similarity to documents about that concept even when the user asks to avoid it.
 We introduce \method, a training-free reranking method for negation-sensitive retrieval.
-\method uses a large language model to decompose a negative query with an exclusion constraint into a target intent and a flipped trap intent, then penalizes documents that are similar to the trap.
-On ExcluIR \citep{zhang2024excluir}, \method reduces trap retrieval across four embedding models while preserving high answer recall under moderate penalty weights.
+\method uses a large language model to extract the target intent and the excluded trap intent, then penalizes documents similar to the trap.
+On ExcluIR \citep{zhang2024excluir}, \method reduces trap retrieval across four embedding models while approximately preserving answer recall under moderate penalty weights.
 \end{abstract}
 
 \section{Introduction}
@@ -41,25 +40,26 @@ Users often express information needs by specifying not only what should be retr
 A query may ask for documents about one topic while excluding a related entity, or for items that belong to a category but differ from a particular instance.
 For example, ``documentaries about the Iraq war, excluding \textit{Gunner Palace}'' asks the retriever to preserve the broad topic while avoiding a specific, highly related title.
 When such documents are used as evidence for generation, retrieving the excluded item can lead the system to ground its answer in material the user explicitly ruled out.
+This risk is amplified in generation settings, where negated contexts can make LLM judgments less faithful \citep{seo-etal-2025-impact}.
 
 This setting is difficult for dense retrieval because the excluded concept is both salient and present in the query.
 The retriever may assign high similarity to a document precisely because it matches the term the user asked to avoid.
 Negative queries with exclusion constraints therefore require a distinction between inclusion and exclusion semantics that standard retrievers often do not encode reliably \citep{lee2026deotrainingfreedirectembedding}.
+Similar failures have also been observed in joint embedding-based vision-language retrieval, where models struggle to distinguish affirmative and negated conditions \citep{alhamoud2025visionlanguagemodelsunderstandnegation}.
 
 Recent benchmarks and systems study this weakness across minimally different negated pairs, realistic negative queries with exclusion constraints, and negative-constraint retrieval \citep{weller-etal-2024-nevir, zhang2024excluir, xu-etal-2025-negconstraint}.
 However, benchmarks with document-level answer and trap links remain scarce, and many existing approaches require specialized training data or model changes.
 We study whether an existing retriever can be made more faithful to the exclusion constraint in a negative query at inference time, without retraining it.
 
-We propose \method, a knowledge-free flipped-intent penalty for negative queries with exclusion constraints.
-Given such a negative query, a large language model produces two short rewrites: a target query that preserves what should be retrieved and a trap query that names the forbidden or flipped intent.
+We propose \method, a training-free inference-time penalty for negative queries with exclusion constraints.
+Given such a negative query, a large language model produces two short rewrites: a target query that preserves what should be retrieved and a trap query that names the forbidden intent.
 \method then penalizes documents that are similar to the trap intent.
-The language model is used only for query rewriting; it does not inspect documents, score candidates, or use oracle answer and trap labels.
+The language model is used only for query rewriting; it does not inspect documents, score candidates, or use gold answer and trap labels.
 
 Our contributions are as follows.
 \begin{itemize}
-    \item We introduce a training-free method for negative queries with exclusion constraints. \method changes only inference-time scores and requires no task-specific supervision, fine-tuning, or retriever modification.
-    \item We formulate a knowledge-free correction for fixed-corpus RAG settings. \method does not add external knowledge or rewrite the corpus; it changes the ranking induced by existing retriever scores.
-    \item We evaluate the method on ExcluIR over the full retrieval corpus across four embedding models, and report a BoolQuestions-style contrastive evaluation in the appendix \citep{zhang2024excluir, zhang2024boolquestionsdoesdenseretrieval}.
+    \item We introduce a training-free trap-penalty reranking method for negative queries with exclusion constraints. \method changes only inference-time scores and does not use gold answer/trap labels for reranking, add external knowledge, or modify the corpus.
+    \item We evaluate the method on ExcluIR over the full retrieval corpus across four embedding models \citep{zhang2024excluir}.
     \item We analyze the recall--violation trade-off and identify failure cases where answer documents mention the excluded entity or lie close to the trap document in embedding space.
 \end{itemize}
 
@@ -71,7 +71,7 @@ The second develops embedding-level corrections for negation-aware retrieval.
 The third uses rank fusion to combine retrieval signals, motivating our score-level reranking formulation.
 
 \paragraph{Negative constraints in retrieval.}
-Negation has long been a weak point for language understanding systems \citep{alhamoud2025visionlanguagemodelsunderstandnegation}.
+Negation has long been a weak point for language understanding systems.
 Language models can be insensitive to negation, fail to capture lexical negation, and struggle to reason under negated statements \citep{truong-etal-2023-language}.
 This weakness also appears in retrieval.
 NevIR tests minimally different query pairs where negation reverses relevance \citep{weller-etal-2024-nevir}, while ExcluIR studies realistic negative queries with exclusion constraints where a retriever must return the target document without surfacing the excluded one \citep{zhang2024excluir}.
@@ -86,20 +86,20 @@ DEO addresses this by decomposing positive and negative components and optimizin
 \paragraph{Rank fusion for reranking.}
 Reciprocal Rank Fusion (RRF) combines ranked lists with reciprocal-rank contributions rather than raw scores, making it useful when different retrieval systems produce incomparable score scales \citep{cormack2009reciprocal}.
 This suggests an anti-RRF variant for exclusion constraints: keep the original-query rank signal but subtract the trap-query contribution, e.g., $1/(k_{\mathrm{rrf}}+r_q(d))-\beta/(k_{\mathrm{rrf}}+r_{\mathrm{trap}}(d))$.
-However, rank-only penalties are sparse and coarse: because RRF ignores score magnitudes, semantically close target documents are frequently pushed out of the top-$k$ results.
-\method keeps the anti-RRF intuition but implements the penalty with dense retrieval scores.
+We also considered this rank-based formulation, but use dense scores in the main method because they provide a smoother penalty signal than rank-only contributions.
 
-\section{K-FLIP}
+\section{FLIP}
 
 \method is a retrieval-time reranking method for negative queries with exclusion constraints.
 It operates on fixed retriever scores by decomposing the query into target and trap intents, then lowering the rank of documents that match the trap intent.
+In the main variant, \method uses the original query as the target-preserving signal and the decomposed trap intent as a penalty signal; a target-minus-trap variant is reported in the appendix.
 The method consists of two steps: query decomposition and score transformation.
 
 \begin{figure*}[t]
     \centering
-    \includegraphics[width=0.96\textwidth]{figures/pipeline_revised_cropped.pdf}
-    \caption{Overview of \method. A negative query with an exclusion constraint is decomposed into target and trap intents. The final document score combines the original-query and target similarities while penalizing similarity to the trap intent.}
-    \label{fig:kflip-pipeline}
+    \includegraphics[width=0.96\textwidth]{figures/flip_pipeline_final_cropped.pdf}
+    \caption{Overview of \method. A negative query with an exclusion constraint is decomposed into target and trap intents. The final document score preserves a positive retrieval signal while penalizing similarity to the trap intent.}
+    \label{fig:flip-pipeline}
 \end{figure*}
 
 \subsection{Query Decomposition}
@@ -108,10 +108,10 @@ Let $q$ be a negative query that contains an exclusion constraint.
 \method uses GPT-4o mini as the decomposer and asks it to produce two rewrites:
 \begin{itemize}
     \item $q_{\mathrm{target}}$: the positive information need, with the exclusion removed but the main topic preserved;
-    \item $q_{\mathrm{trap}}$: the forbidden or flipped intent that should be penalized.
+    \item $q_{\mathrm{trap}}$: the forbidden intent that should be penalized.
 \end{itemize}
 For example, the query ``location of Friday Harbor Airport without bringing up Dayton International Airport'' is decomposed into target intent ``location of Friday Harbor Airport'' and trap intent ``Dayton International Airport''.
-The LLM is not used to score documents or inspect gold labels; it only produces these two strings.
+The LLM is not used to score documents, inspect the corpus, or access answer/trap labels; it only produces these two strings.
 
 \subsection{Score Transformation}
 
@@ -121,7 +121,7 @@ The baseline ranks documents by $s(d,q)$, or by a cleaned rewrite of the origina
 \begin{equation}
     S(d) = \alpha s(d,q) + \gamma s(d,q_{\mathrm{target}})
            - \beta s(d,q_{\mathrm{trap}}),
-    \label{eq:kflip}
+    \label{eq:flip}
 \end{equation}
 where $\alpha$, $\gamma$, and $\beta$ control the original-query, target, and trap terms.
 The positive weights $\alpha$ and $\gamma$ select which retrieval signal to preserve: the original query score or the target-query score.
@@ -206,11 +206,11 @@ Second, many answer and trap documents are near-neighbors in embedding space: th
 In these cases, the trap penalty often lowers both documents together.
 
 These failures suggest that \method is a retrieval-stage correction, not a complete solution to negation.
-Future systems should combine query-level flipped-intent penalties with passage- or span-level evidence checks so that an incidental mention of the forbidden entity does not automatically invalidate an otherwise useful document.
+Future systems should combine trap-query penalties with passage- or span-level evidence checks so that an incidental mention of the forbidden entity does not automatically invalidate an otherwise useful document.
 
 \section{Conclusion}
 
-We presented \method, a knowledge-free flipped-intent penalty for negative queries with exclusion constraints.
+We presented \method, a training-free flipped-query penalty for negative queries with exclusion constraints.
 By extracting a trap intent from the query and subtracting trap similarity, \method reduces forbidden-document retrieval across four dense retrievers while exposing a clear recall--violation trade-off.
 Because it requires no task-specific training, \method can be easily integrated with existing dense retrievers as an inference-time correction.
 
@@ -220,7 +220,7 @@ Because it requires no task-specific training, \method can be easily integrated 
 The reported \method settings are selected on the evaluated sample to characterize the trade-off; future work should tune hyperparameters on a separate development set.
 Our evaluation is limited to ExcluIR and dense retrieval because few benchmarks provide document-level annotations for both target and forbidden evidence.
 Additional evaluations should include sparse retrieval, cross-encoder reranking, and downstream RAG answer quality.
-The current linear penalty may over-demote correct documents that contain incidental mentions of excluded entities.
+The current linear penalty may over-demote correct documents that contain incidental mentions of excluded entities or share negation-related terms with trap documents \citep{van_den_Elsen_2025}.
 
 \section*{Ethical Considerations}
 

@@ -1,4 +1,4 @@
-# K-FLIP Dual-Stream Experiment
+# FLIP Dual-Stream Experiment
 
 ## Environment
 
@@ -27,7 +27,7 @@ Outputs:
 - `data/nevir_mini_train_q1_50_seed42.csv`
 - `data/nevir_mini_train_q1_50_seed42.jsonl`
 
-For the planned K-FLIP setup, use `q1` so `doc1` is the answer document and
+For the planned FLIP setup, use `q1` so `doc1` is the answer document and
 `doc2` is the trap document. If `q2` is selected later, the script keeps the raw
 `doc1` and `doc2` columns and flips the explicit `answer_doc` / `trap_doc`
 labels.
@@ -50,7 +50,7 @@ python scripts/setup_hotpotqa_sample.py \
 
 ```bash
 conda activate flip
-python scripts/run_kflip_experiment.py \
+python scripts/run_flip_experiment.py \
   --sample-csv data/nevir_mini_train_q1_50_seed42.csv \
   --retriever both \
   --decomposition-mode openai \
@@ -62,7 +62,7 @@ Candidate-guarded reranking can reuse an existing decomposition cache and avoid
 another OpenAI call:
 
 ```bash
-python scripts/run_kflip_experiment.py \
+python scripts/run_flip_experiment.py \
   --sample-csv data/nevir_mini_train_q1_50_seed42.csv \
   --retriever both \
   --decompositions-jsonl outputs/openai_full_v3/query_decompositions.jsonl \
@@ -174,10 +174,10 @@ If OpenAI credentials are not available yet, run a quick structural check with
 the NevIR paired-query fallback:
 
 ```bash
-python scripts/run_kflip_experiment.py \
+python scripts/run_flip_experiment.py \
   --sample-csv data/nevir_mini_train_q1_50_seed42.csv \
   --retriever bm25 \
   --decomposition-mode heuristic \
   --max-samples 5 \
-  --output-dir outputs/smoke
+  --output-dir outputs/basic_check
 ```

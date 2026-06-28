@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Build an ExcluIR sample in the local K-FLIP doc1/doc2 format."""
+"""Build an ExcluIR sample in the local FLIP doc1/doc2 format."""
 
 from __future__ import annotations
 
@@ -13,7 +13,7 @@ import pandas as pd
 
 
 def parse_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description="Convert ExcluIR to K-FLIP CSV/JSONL.")
+    parser = argparse.ArgumentParser(description="Convert ExcluIR to FLIP CSV/JSONL.")
     parser.add_argument("--raw-dir", default="data/excluir_raw")
     parser.add_argument("--sample-size", type=int, default=1000)
     parser.add_argument("--seed", type=int, default=42)
