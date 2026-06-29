@@ -14,9 +14,12 @@
 \usepackage{booktabs}
 \usepackage{graphicx}
 \usepackage{rotating}
+\usepackage{fancyvrb}
 \usepackage{xspace}
 
 \newcommand{\method}{FLIP\xspace}
+\definecolor{promptborder}{RGB}{190,95,0}
+\definecolor{promptfill}{RGB}{255,248,240}
 
 \title{FLIP: A Flipped-Query Penalty for Negative-Constraint Retrieval}
 
@@ -30,8 +33,8 @@ Users often express information needs with negative constraints.
 Beyond explicit negation, queries may ask for answers that include one concept while excluding another, or for entities that belong to a category but differ from a closely related instance.
 Because the excluded concept still appears in the query text, dense retrievers may assign high similarity to documents about that concept even when the user asks to avoid it.
 We introduce \method, a training-free reranking method for negation-sensitive retrieval.
-\method uses a large language model to extract the target intent and the excluded trap intent, then penalizes documents similar to the trap.
-On ExcluIR \citep{zhang2024excluir}, \method reduces trap retrieval across four embedding models while approximately preserving answer recall at recall-preserving penalty weights.
+\method uses a large language model to extract a target query and a trap query for the excluded side, then penalizes documents similar to the trap query.
+On ExcluIR, \method reduces trap retrieval across four embedding models with minimal loss in answer recall under selected penalty settings.
 \end{abstract}
 
 \section{Introduction}
@@ -39,8 +42,7 @@ On ExcluIR \citep{zhang2024excluir}, \method reduces trap retrieval across four 
 Users often express information needs by specifying not only what should be retrieved, but also what should be avoided.
 A query may ask for documents about one topic while excluding a related entity, or for items that belong to a category but differ from a particular instance.
 For example, ``documentaries about the Iraq war, excluding \textit{Gunner Palace}'' asks the retriever to preserve the broad topic while avoiding a specific, highly related title.
-When such documents are used as evidence for generation, retrieving the excluded item can lead the system to ground its answer in material the user explicitly ruled out.
-This risk is amplified in generation settings, where negated contexts can make LLM judgments less faithful \citep{seo-etal-2025-impact}.
+When such documents are used as evidence in retrieval-augmented generation, an excluded document can enter the evidence context and cause the generator to ground its answer in material the user explicitly ruled out.
 
 This setting is difficult for dense retrieval because the excluded concept is both salient and present in the query.
 The retriever may assign high similarity to a document precisely because it matches the term the user asked to avoid, reflecting the lexical and semantic signals retained in dense representations \citep{ram-etal-2023-token}.
@@ -51,44 +53,37 @@ Recent benchmarks and systems study this weakness across minimally different neg
 However, benchmarks with document-level answer and trap links remain scarce, and many existing approaches require specialized training data or model changes.
 We study whether an existing retriever can be made more faithful to the exclusion constraint in a negative query at inference time, without retraining it.
 
-We propose \method, a training-free inference-time penalty for negative queries with exclusion constraints.
+We propose \method, a training-free reranking method for negative queries with exclusion constraints.
 Given such a negative query, a large language model produces two short rewrites: a target query that preserves what should be retrieved and a trap query that names the forbidden intent.
 \method then penalizes documents that are similar to the trap intent.
 The language model is used only for query rewriting; it does not inspect documents, score candidates, or use gold answer and trap labels.
 
 Our contributions are as follows.
 \begin{itemize}
-    \item We introduce \method, a training-free trap-penalty reranking method that changes only inference-time scores and uses no gold answer/trap labels, external knowledge, or corpus modifications.
-    \item We evaluate the method on ExcluIR over the full retrieval corpus across four embedding models \citep{zhang2024excluir}.
-    \item We analyze the recall--violation trade-off and identify failure cases where answer documents mention the excluded entity or lie close to the trap document in embedding space.
+    \item We introduce \method, a training-free trap-penalty reranking method that changes only inference-time scores and requires no gold answer/trap labels, external knowledge, retriever retraining, or corpus modification.
+    \item We formulate negative-constraint retrieval as a recall--violation trade-off and show that a trap-specific penalty can reduce excluded-document retrieval while preserving answer recall under suitable penalty strengths.
+    \item We analyze when document-level trap penalties succeed or fail, identifying cases where relevant documents contain incidental trap evidence or lie close to trap documents in embedding space.
 \end{itemize}
 
 \section{Related Work}
 
-Our work is related to prior studies on negative constraints in retrieval, embedding-level negation correction, and rank-fusion-based reranking.
-
 \paragraph{Negative constraints in retrieval.}
-Negation has long been a weak point for language understanding systems.
-Language models can be insensitive to negation, fail to capture lexical negation, and struggle to reason under negated statements \citep{truong-etal-2023-language}.
-This weakness also appears in retrieval.
-NevIR tests minimally different query pairs where negation reverses relevance \citep{weller-etal-2024-nevir}, while ExcluIR studies realistic negative queries with exclusion constraints where a retriever must return the target document without surfacing the excluded one \citep{zhang2024excluir}.
-NegConstraint frames negative constraints as a logical consistency problem and applies neural-symbolic reranking \citep{xu-etal-2025-negconstraint}.
-In biomedical QA, dense retrieval can blur support and contradiction when negation is central to the evidence \citep{sahoo2026negationsemanticdiagnosingdense}.
+Language models can be insensitive to negation and struggle to reason under negated statements \citep{truong-etal-2023-language}.
+This weakness also appears in retrieval: NevIR tests minimally different negated pairs \citep{weller-etal-2024-nevir}, ExcluIR studies exclusion constraints with answer and trap documents \citep{zhang2024excluir}, BoolQuestions probes Boolean logic in dense retrieval \citep{zhang2024boolquestionsdoesdenseretrieval}, and NegConstraint applies neural-symbolic reranking for negative constraints \citep{xu-etal-2025-negconstraint}.
+Similar support/contradiction confusion appears in biomedical QA when negation is central to the evidence \citep{sahoo2026negationsemanticdiagnosingdense}.
 
 \paragraph{Embedding-level approaches to negation.}
 A negated query still contains the entity or concept to be avoided, so dense encoders can place it near documents that violate the request.
-DEO addresses this by decomposing positive and negative components and optimizing the query embedding at inference time for negation-aware retrieval \citep{lee2026deotrainingfreedirectembedding}.
-\method keeps the retriever and document embeddings fixed, using rewrites only to expose target and trap intents before applying score-level penalties.
+DEO optimizes query embeddings at inference time for negation-aware retrieval \citep{lee2026deotrainingfreedirectembedding}; \method instead keeps retriever and document embeddings fixed and applies a score-level trap penalty.
 
 \paragraph{Rank fusion for reranking.}
-Reciprocal Rank Fusion (RRF) combines ranked lists with reciprocal-rank contributions rather than raw scores, making it useful when different retrieval systems produce incomparable score scales \citep{cormack2009reciprocal}.
-Because the trap query represents evidence to demote rather than combine, this suggests an anti-RRF variant for exclusion constraints: keep the original-query rank signal but subtract the trap-query contribution, e.g., $1/(k_{\mathrm{rrf}}+r_q(d))-\beta/(k_{\mathrm{rrf}}+r_{\mathrm{trap}}(d))$.
-We also considered this rank-based formulation, but use dense scores in the main method because they provide a smoother penalty signal than rank-only contributions.
+RRF combines ranked lists through reciprocal-rank contributions when raw scores are incomparable \citep{cormack2009reciprocal}.
+We considered an anti-RRF variant that subtracts trap-query rank evidence, but use dense scores because they provide a smoother penalty signal.
 
 \section{FLIP}
 
 \method is a retrieval-time reranking method for negative queries with exclusion constraints.
-It operates on fixed retriever scores by decomposing the query into target and trap intents, then lowering the rank of documents that match the trap intent.
+It operates on fixed retriever scores by decomposing the query into target and trap intents, then lowering the rank of documents that are similar to the trap query.
 In the main variant, \method uses the original query as the target-preserving signal and the decomposed trap intent as a penalty signal; a target-minus-trap variant is reported in the appendix.
 The method consists of two steps: query decomposition and score transformation.
 
@@ -107,8 +102,10 @@ Let $q$ be a negative query that contains an exclusion constraint.
     \item $q_{\mathrm{target}}$: the positive information need, with the exclusion removed but the main topic preserved;
     \item $q_{\mathrm{trap}}$: the forbidden intent that should be penalized.
 \end{itemize}
+Although many traps are named entities or titles, $q_{\mathrm{trap}}$ is not limited to entities: it may refer to an excluded concept, attribute, condition, or constraint.
 For example, the query ``location of Friday Harbor Airport without bringing up Dayton International Airport'' is decomposed into target intent ``location of Friday Harbor Airport'' and trap intent ``Dayton International Airport''.
-The LLM is not used to score documents, inspect the corpus, or access answer/trap labels; it only produces these two strings.
+The LLM only produces these strings; it does not score documents, inspect the corpus, or use gold labels.
+Appendix~\ref{sec:appendix-decomposition-prompt} provides the decomposition prompt.
 
 \subsection{Score Transformation}
 
@@ -132,9 +129,11 @@ This formulation requires scores to be comparable across query rewrites; in this
 
 \paragraph{Dataset.}
 We evaluate on 3,452 negative queries with exclusion constraints from ExcluIR \citep{zhang2024excluir}.
-Each example contains a query, a gold answer document, and a trap document corresponding to the excluded intent.
+Each example contains a rewritten exclusion query, a gold answer document, and a trap document corresponding to the excluded intent.
 We score against the full ExcluIR corpus of 90,406 documents.
-Gold and trap document indices are used only for evaluation, not for query decomposition, retrieval, or reranking.
+In our notation, the rewritten query is $q$, the answer-side document is $d_{\mathrm{target}}$, and the excluded-side document is $d_{\mathrm{trap}}$; $q_{\mathrm{target}}$ and $q_{\mathrm{trap}}$ are generated only from $q$ by the decomposer.
+We use ExcluIR as the main benchmark because document-level target/trap annotations make recall and violation directly measurable, and report a smaller BoolQuestions-not auxiliary set in the appendix.
+Appendix~\ref{sec:appendix-dataset-mapping} details the mapping from dataset fields to $q_{\mathrm{target}}$, $q_{\mathrm{trap}}$, $d_{\mathrm{target}}$, and $d_{\mathrm{trap}}$.
 
 \paragraph{Retrievers and Decomposition.}
 We test four embedding models: OpenAI text-embedding-3-small, OpenAI text-embedding-3-large, Qwen3-Embedding-0.6B, and Qwen3-Embedding-4B \citep{zhang2025qwen3embeddingadvancingtext}.
@@ -142,7 +141,7 @@ For each query, we generate $q_{\mathrm{target}}$ and $q_{\mathrm{trap}}$ with G
 For the main variant, we use the original query as the positive retrieval signal and $q_{\mathrm{trap}}$ only as a penalty signal: $S(d)=s(d,q)-\beta s(d,q_{\mathrm{trap}})$.
 We evaluate $\beta \in [0,1]$ at intervals of 0.01 to characterize the recall--violation trade-off rather than to claim a deployment-ready tuned hyperparameter.
 Table~\ref{tab:main-results} reports the setting with the lowest average violation among settings that preserve average recall over $k \in \{3,5,7,9\}$ relative to the baseline.
-Appendix~\ref{tab:appendix-excluir-baseline-beta-000-049} reports the full beta grid, including the target-minus-trap variant.
+Tables~\ref{tab:appendix-excluir-baseline-beta-000-049}--\ref{tab:appendix-excluir-target-beta-050-100} report the full ExcluIR results across penalty-weight settings, including the target-minus-trap variant.
 
 \paragraph{Metrics.}
 Recall@$k$ measures whether the gold answer document appears in the top $k$.
@@ -154,40 +153,35 @@ For retrieval with exclusion constraints, higher recall and lower violation are 
 \begin{table*}[t]
 \centering
 \small
-\begin{tabular}{llrrrrr}
+\begin{tabular}{llrrrrrr}
 \toprule
-Retriever & Method & $\beta$ & R@3 & V@3 & R@5 & V@5 \\
+Retriever & Method & $\beta$ & R@3 & V@3 & R@5 & V@5 & $\Delta$V@5 \\
 \midrule
-text-embedding-3-small & Baseline & -- & 0.9166 & 0.8250 & 0.9377 & 0.8789 \\
-text-embedding-3-small & \method & 0.32 & \textbf{0.9244} & \textbf{0.4287} & 0.9357 & \textbf{0.5165} \\
+text-embedding-3-small & Baseline & -- & 0.9166 & 0.8250 & 0.9377 & 0.8789 & -- \\
+text-embedding-3-small & \method & 0.32 & \textbf{0.9244} & \textbf{0.4287} & 0.9357 & \textbf{0.5165} & \textbf{-0.3624} \\
 \midrule
-text-embedding-3-large & Baseline & -- & 0.9270 & 0.8323 & 0.9400 & 0.8862 \\
-text-embedding-3-large & \method & 0.18 & \textbf{0.9273} & \textbf{0.6283} & 0.9397 & \textbf{0.7141} \\
+text-embedding-3-large & Baseline & -- & 0.9270 & 0.8323 & 0.9400 & 0.8862 & -- \\
+text-embedding-3-large & \method & 0.18 & \textbf{0.9273} & \textbf{0.6283} & 0.9397 & \textbf{0.7141} & \textbf{-0.1721} \\
 \midrule
-Qwen3-Embedding-0.6B & Baseline & -- & 0.9238 & 0.6654 & 0.9360 & 0.7277 \\
-Qwen3-Embedding-0.6B & \method & 0.06 & \textbf{0.9247} & \textbf{0.6011} & 0.9360 & \textbf{0.6611} \\
+Qwen3-Embedding-0.6B & Baseline & -- & 0.9238 & 0.6654 & 0.9360 & 0.7277 & -- \\
+Qwen3-Embedding-0.6B & \method & 0.06 & \textbf{0.9247} & \textbf{0.6011} & 0.9360 & \textbf{0.6611} & \textbf{-0.0666} \\
 \midrule
-Qwen3-Embedding-4B & Baseline & -- & 0.9282 & 0.6816 & 0.9421 & 0.7361 \\
-Qwen3-Embedding-4B & \method & 0.11 & \textbf{0.9296} & \textbf{0.5716} & \textbf{0.9424} & \textbf{0.6359} \\
+Qwen3-Embedding-4B & Baseline & -- & 0.9282 & 0.6816 & 0.9421 & 0.7361 & -- \\
+Qwen3-Embedding-4B & \method & 0.11 & \textbf{0.9296} & \textbf{0.5716} & \textbf{0.9424} & \textbf{0.6359} & \textbf{-0.1002} \\
 \bottomrule
 \end{tabular}
-\caption{ExcluIR results on 3,452 queries over the full 90,406-document corpus. Only one representative $\beta$ setting is shown for each retriever: the setting with the lowest average violation among those preserving average recall relative to the baseline. R is recall and V is trap violation rate. Bold \method values improve on the corresponding baseline value.}
+\caption{ExcluIR results on 3,452 queries over the full 90,406-document corpus. Only one representative $\beta$ setting is shown for each retriever: the setting with the lowest average violation among those preserving average recall relative to the baseline. R is recall, V is trap violation rate, and $\Delta$V@5 is \method{} V@5 minus baseline V@5 for the same retriever. Bold \method values improve on the corresponding baseline value.}
 \label{tab:main-results}
 \end{table*}
 
 Table~\ref{tab:main-results} shows that \method reduces trap retrieval across all four retrievers.
-The baseline retrievers achieve high recall, but they often retrieve the forbidden document as well: violation@5 ranges from 0.728 to 0.886.
-Across the beta grid, \method shows a clear recall--violation trade-off.
-As $\beta$ increases, trap documents are demoted more strongly, but very large penalties can also demote answer documents that share evidence with the trap intent.
-At $\beta=1.0$, average violation drops to 0.030--0.036 across retrievers, but average recall also falls to 0.779--0.835, well below the baseline range of 0.937--0.942.
+The baselines achieve high recall but often retrieve the forbidden document as well, with violation@5 ranging from 0.728 to 0.886.
+Increasing $\beta$ creates a clear recall--violation trade-off: stronger penalties demote trap documents, but very large penalties can also demote answer documents that share evidence with the trap intent.
+At $\beta=1.0$, average violation drops to 0.030--0.036, but average recall falls to 0.779--0.835.
 
-Despite this trade-off, there are beta values where recall remains effectively unchanged while violation decreases.
-At the representative settings in Table~\ref{tab:main-results}, average recall changes by at most 0.0002 from the baseline, while average violation decreases for every retriever.
+At the representative settings, average recall changes by at most 0.0002 from the baseline while average violation decreases for every retriever.
 The largest top-$k$ reduction occurs for text-embedding-3-small, where violation@5 decreases from 0.879 to 0.517 while recall@5 changes only from 0.938 to 0.936.
-
-The appendix shows that the size of the violation reduction varies across retrievers and scoring variants, but the beta-dependent trade-off remains.
-The range of recall-preserving beta values also differs by retriever, suggesting that the penalty strength should be selected based on the retriever and scoring variant.
-Overall, the results show that a score-level trap penalty can preserve target-document retrieval while moving trap documents out of the top ranks.
+The appendix shows the same beta-dependent trade-off across scoring variants, suggesting that the penalty strength should be selected for each retriever and scoring variant.
 
 \section{Failure Analysis}
 
@@ -195,30 +189,33 @@ We manually inspected failure cases for the trap-penalty variant.
 Two patterns dominate.
 First, many gold answer documents mention the excluded entity.
 For example, an answer page about a film may list an actor that the query asks to exclude.
-Because \method penalizes document-level similarity to the trap query, it can demote otherwise correct documents that contain incidental trap evidence.
-Second, many answer and trap documents are near-neighbors in embedding space: they concern sibling entities, adaptations, cast members, or closely related institutions.
-In these cases, the trap penalty often lowers both documents together.
+Because \method applies a document-level penalty, such incidental trap evidence can lower otherwise correct documents.
+Second, many answer and trap documents are close neighbors in embedding space: they often concern sibling entities, adaptations, cast members, or closely related institutions.
+In these cases, the trap penalty can affect both documents.
 
-These failures suggest that \method is a retrieval-stage correction, not a complete solution to negation.
-Future systems should combine trap-query penalties with passage- or span-level evidence checks so that an incidental mention of the forbidden entity does not automatically invalidate an otherwise useful document.
+These failures reflect the limits of a document-level penalty, not the reranking principle itself.
+\method does not modify embeddings, but adjusts ranks at inference time by subtracting trap-specific similarity.
+It works best when the trap signal is more specific to the excluded document than to the answer document.
+When both documents share entities or lie close in embedding space, the penalty can affect both, suggesting the need for passage- or span-level evidence checks.
 
 \section{Conclusion}
 
 We presented \method, a training-free flipped-query penalty for negative queries with exclusion constraints.
-By extracting a trap intent from the query and subtracting trap similarity, \method reduces forbidden-document retrieval across four dense retrievers while exposing a clear recall--violation trade-off.
-Because it requires no task-specific training, \method can be used with existing dense retrievers as an inference-time correction.
+By extracting a trap intent from the query and subtracting trap similarity, \method turns the exclusion constraint into a controllable score penalty.
+Increasing $\beta$ strengthens the penalty on trap-like documents, which creates a recall--violation trade-off; however, our results show that suitable $\beta$ values can preserve answer recall while reducing trap retrieval.
+This makes \method useful as an inference-time correction for existing dense retrievers, especially when retraining or changing the corpus is impractical.
 
 \section*{Limitations}
 
-\method depends on the quality of LLM-generated decompositions and assumes that retriever scores are comparable across target and trap queries.
-The reported \method settings are selected on the evaluated sample to characterize the trade-off; future work should tune hyperparameters on a separate development set.
-Our evaluation is limited to ExcluIR and dense retrieval because few benchmarks provide document-level annotations for both target and forbidden evidence.
+\method is training-free because it does not update the retriever, require contrastive training, or construct additional supervision, but it incurs additional inference cost.
+Inference adds query decomposition with an external language model, one extra retrieval or scoring pass for $q_{\mathrm{trap}}$, and linear reranking over candidates; the decomposition step can dominate latency and incur API cost.
+We therefore frame \method as a reranking method with no training cost, leaving latency--cost evaluation and compact local decomposition models to future work.
+\method also assumes that decompositions are reliable and that retriever scores are comparable across target and trap queries.
+The reported settings characterize the trade-off on the evaluated sample rather than a deployment-tuned operating point; in practice, $\beta$ should be selected on a held-out validation split.
+Our main evaluation is limited to ExcluIR and dense retrieval because few benchmarks provide both target and trap documents; rather than generating synthetic trap documents with an LLM, we use existing annotations so violation measurement remains grounded in benchmark evidence.
 Additional evaluations should include sparse retrieval, cross-encoder reranking, and downstream RAG answer quality.
-The current linear penalty may over-demote correct documents that contain incidental mentions of excluded entities or share negation-related terms with trap documents \citep{van_den_Elsen_2025}.
-
-\section*{Ethical Considerations}
-
-This work uses public benchmark data and only rewrites queries for retrieval; deployments should monitor over-penalization when excluded entities appear in otherwise relevant evidence.
+Because \method applies a document-level penalty, it can be less precise when relevant documents incidentally mention the excluded entity or closely overlap with trap documents.
+Future work can combine \method with passage- or span-level checks to separate central trap evidence from incidental mentions.
 
 \clearpage
 \bibliography{custom}
@@ -230,6 +227,107 @@ This work uses public benchmark data and only rewrites queries for retrieval; de
 
 \paragraph{Compute.}
 All experiments were run on a single RTX 4090 GPU with 16 vCPUs (AMD Ryzen 9 7950X 16-Core Processor), 61 GB memory, and a 20 GB container disk.
+
+\section{Query Decomposition Prompt}
+\label{sec:appendix-decomposition-prompt}
+
+The template below was used with GPT-4o mini at temperature 0 to generate
+$q_{\mathrm{target}}$ and $q_{\mathrm{trap}}$.
+
+\begin{figure*}[p]
+\centering
+\begingroup
+\setlength{\fboxsep}{0pt}
+\fcolorbox{promptborder}{promptfill}{%
+\begin{minipage}{0.96\linewidth}
+\colorbox{promptborder}{%
+\begin{minipage}{\dimexpr\linewidth-2\fboxsep\relax}
+\textcolor{white}{\textbf{Query Decomposition Prompt Template}}
+\end{minipage}}
+\vspace{0.6em}
+\begin{minipage}{0.94\linewidth}
+\small
+\textbf{Role:}
+You are a recall-preserving query decomposition module for
+exclusion-aware information retrieval.
+
+\textbf{Task:}
+Given only the original query, produce two retrieval queries:
+$q_{\mathrm{target}}$, the positive information need, and
+$q_{\mathrm{trap}}$, a short high-precision anchor for the unwanted,
+excluded, contrastive, or constraint-violating side.
+Do not use gold documents, trap documents, answers, relevance labels,
+dataset annotations, or external knowledge beyond what is directly implied
+by the query.
+
+\textbf{Decomposition Rules:}
+Preserve the main search intent in $q_{\mathrm{target}}$ and remove only
+phrases that point to the unwanted side.
+$q_{\mathrm{target}}$ should remain independently useful for retrieval and
+should not encode the exclusion with wrappers such as ``not'', ``without'',
+``excluding'', ``except'', ``instead of'', or ``rather than'', unless the
+negated phrase is the natural name of the desired concept.
+$q_{\mathrm{trap}}$ should be the strongest compact retrieval anchor for
+the unwanted side: preferably an explicitly excluded named entity, title,
+organization, person, work, place, product, event, date, object, attribute,
+condition, relation, role, or category.
+Strip exclusion wrappers from $q_{\mathrm{trap}}$ and avoid broad anchors
+such as ``career'', ``film'', ``country'', or ``person'' unless the unwanted
+side is exactly that broad.
+If the query contains a direct contrast, use the obvious counterpart when
+available (e.g., legal $\leftrightarrow$ illegal, allowed
+$\leftrightarrow$ forbidden, paid $\leftrightarrow$ unpaid, present
+$\leftrightarrow$ absent, won $\leftrightarrow$ lost).
+If no direct counterpart is obvious, use the explicit unwanted phrase.
+Set $q_{\mathrm{trap}}$ to an empty string only when no excluded,
+negative, contrastive, exception, or undesired side is present.
+
+\textbf{Output Format:}
+Return only valid JSON with exactly two fields:
+
+\noindent{\ttfamily\scriptsize
+\{\\
+\hspace*{1em}"q\_target": "...",\\
+\hspace*{1em}"q\_trap": "..."\\
+\}
+}
+
+\textbf{User Message Template:}
+
+\noindent{\ttfamily\scriptsize
+Now decompose the following query.\\[0.2em]
+Original query:\\
+\{original\_query\}\\[0.2em]
+Return only valid JSON. Do not include markdown, comments,
+explanations, or extra fields.\\[0.2em]
+\{\\
+\hspace*{1em}"q\_target": "...",\\
+\hspace*{1em}"q\_trap": "..."\\
+\}
+}
+\end{minipage}
+\vspace{0.7em}
+\end{minipage}}
+\endgroup
+\end{figure*}
+
+\clearpage
+\section{Dataset Mapping and Auxiliary Set}
+\label{sec:appendix-dataset-mapping}
+
+ExcluIR provides a natural four-part structure for our setting.
+The rewritten exclusion query is $q$, the answer-side corpus index is $d_{\mathrm{target}}$, and the excluded-side corpus index is $d_{\mathrm{trap}}$.
+Its paired construction also makes oracle-style query anchors recoverable: the original positive question can be viewed as $q_{\mathrm{target}}$, and the title or short identifier of the excluded document can be viewed as $q_{\mathrm{trap}}$.
+In the reported \method experiments, however, $q_{\mathrm{target}}$ and $q_{\mathrm{trap}}$ are generated only from $q$ by GPT-4o mini; gold document indices are used only for evaluation.
+
+For other negative-constraint retrieval datasets, $q_{\mathrm{target}}$ is the positive information need after removing the exclusion, $q_{\mathrm{trap}}$ is the compact forbidden anchor, $d_{\mathrm{target}}$ is a document satisfying the positive need, and $d_{\mathrm{trap}}$ is a plausible but constraint-violating document.
+When a dataset provides positive and negative passages, we map them to $d_{\mathrm{target}}$ and $d_{\mathrm{trap}}$ respectively.
+When it provides only documents, $q_{\mathrm{target}}$ and $q_{\mathrm{trap}}$ can be produced by the same query-only decomposer.
+
+As an auxiliary check, we evaluate the subset of BoolQuestions \citep{zhang2024boolquestionsdoesdenseretrieval} with \texttt{question\_type = not}.
+Each example includes a positive passage and a negative passage that can be treated as $d_{\mathrm{target}}$ and $d_{\mathrm{trap}}$.
+This yields 323 examples, 195 from MS MARCO and 128 from Natural Questions, over a 646-document evaluation corpus.
+Because BoolQuestions does not provide explicit $q_{\mathrm{target}}$ and $q_{\mathrm{trap}}$ fields, we generate them with the same GPT-4o mini decomposer and report results across penalty-weight settings in Tables~\ref{tab:appendix-boolquestions-baseline-beta-000-049}--\ref{tab:appendix-boolquestions-target-beta-050-100}.
 
 \input{appendix_beta_tables}
 
